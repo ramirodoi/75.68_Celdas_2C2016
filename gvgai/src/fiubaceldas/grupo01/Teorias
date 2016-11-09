@@ -1,16 +1,22 @@
 [
 {
+  "id": 1,
   "condicionInicial": "wwwwwwwww\nwA..wwwww\nw.11wwwww\nw.1.www0w\nwww.www0w\nwww....0w\nww.B.w..w\nww...wwww\nwwwwwwwww\n",
+  "idSitCondicionInicial": 1,
   "accion": "derecha",
   "efectosPredichos": "wwwwwwwww\nwA..wwwww\nw.11wwwww\nw.1.www0w\nwww.www0w\nwww....0w\nww..Bw..w\nww...wwww\nwwwwwwwww\n",
+  "idSitEfectosPredichos": 2,
   "k": 1.0,
   "p": 1.0,
   "u": 1.0
 },
 {
+  "id": 2,
   "condicionInicial": "wwwwwwwww\nwA..wwwww\nw.11wwwww\nw.1.www0w\nwww.www0w\nwww....0w\nww..Bw..w\nww...wwww\nwwwwwwwww\n",
+  "idSitCondicionInicial": 2,
   "accion": "abajo",
   "efectosPredichos": "wwwwwwwww\nwA..wwwww\nw.11wwwww\nw.1.www0w\nwww.www0w\nwww....0w\nww...w..w\nww..Bwwww\nwwwwwwwww\n",
+  "idSitEfectosPredichos": 3,
   "k": 1.0,
   "p": 1.0,
   "u": 1.0

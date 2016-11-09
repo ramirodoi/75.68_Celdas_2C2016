@@ -3,9 +3,12 @@ package fiubaceldas.grupo01;
 import ontology.Types.ACTIONS;
 
 public class Teoria {
+	private int id;
 	private String condicionInicial;
+	private int idSitCondicionInicial;
 	private String accion;
 	private String efectosPredichos;
+	private int idSitEfectosPredichos;
 	private double k;
 	private double p;
 	private double u;
@@ -13,23 +16,42 @@ public class Teoria {
 	public Teoria() {
 	}
 	
-	public Teoria(String condicionInicial, String accion, 
-				  String efectosPredichos, double k, 
+	public Teoria(int id, String condicionInicial, int idSitCondicionInicial, String accion, 
+				  String efectosPredichos, int idSitEfectosPredichos, double k, 
 				  double p, double u) {
+		this.setId(id);
 		this.setCondicionInicial(condicionInicial);
+		this.setIdSitCondicionInicial(idSitCondicionInicial);
 		this.setAccion(accion);
 		this.setEfectosPredichos(efectosPredichos);
+		this.setIdSitEfectosPredichos(idSitEfectosPredichos);
 		this.setK(k);
 		this.setP(p);
 		this.setU(u);
 	}
 
+	public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
 	public String getCondicionInicial() {
 		return condicionInicial;
 	}
 
 	public void setCondicionInicial(String condicionInicial) {
 		this.condicionInicial = condicionInicial;
+	}
+	
+	public int getIdSitCondicionInicial() {
+		return idSitCondicionInicial;
+	}
+
+	public void setIdSitCondicionInicial(int idSitCondicionInicial) {
+		this.idSitCondicionInicial = idSitCondicionInicial;
 	}
 
 	public String getAccionComoString() {		
@@ -88,6 +110,14 @@ public class Teoria {
 
 	public void setEfectosPredichos(String efectosPredichos) {
 		this.efectosPredichos = efectosPredichos;
+	}
+	
+	public int getIdSitEfectosPredichos() {
+		return idSitEfectosPredichos;
+	}
+
+	public void setIdSitEfectosPredichos(int idSitEfectosPredichos) {
+		this.idSitEfectosPredichos = idSitEfectosPredichos;
 	}
 
 	public double getK() {
