@@ -25,6 +25,11 @@ public class Situacion {
 		this.casilleros = casilleros;
 	}
 	
+	public boolean esIgualA(Situacion otraSituacion) {
+		//TODO
+		return false;
+	}
+	
 	public String toString() {
 		StringBuilder sb = new StringBuilder("");
 		for(int i = 0;i < 7; i++){

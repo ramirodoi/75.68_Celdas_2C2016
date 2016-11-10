@@ -26,6 +26,8 @@ public class Agent extends AbstractMultiPlayer {
 	private Perception medioManager;
 	private Gson gsonManager;
 	private int playerID;
+	private ArrayList<Teoria> teorias;
+	private ArrayList<Situacion> situacionesConocidas;
 	
 	public Agent(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer, int playerID) {
 		this.medioManager =  new Perception(stateObs);
@@ -36,7 +38,9 @@ public class Agent extends AbstractMultiPlayer {
 	@Override
 	public ACTIONS act(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer){	
 		this.medioManager =  new Perception(stateObs);
-		ArrayList<Teoria> teorias = this.ObtenerTeorias();
+		this.teorias = this.ObtenerTeorias();
+		this.situacionesConocidas = this.obtenerSituacionesConocidas();
+		Situacion situacionActual = new Situacion(this.situacionesConocidas.size()+1,this.obtenerCasillerosSitActual());
 		
 		if (teorias != null){
 			for (Teoria teoria : teorias) {
@@ -44,8 +48,10 @@ public class Agent extends AbstractMultiPlayer {
 				if (teoria != null){
 					//TODO: calcular la utilidad para que siempre agarre la mejor y no la primera de la lista.
 					if (teoria.getU() > 0){
-						if (teoria.getCondicionInicial().equals(this.medioManager.toString())){
+						Situacion sitCondicionInicial = teoria.getSitCondicionInicial();
+						if (situacionActual.esIgualA(sitCondicionInicial)){
 							//TODO: ver cómo se hace para comparar los efectos predichos.
+							//no sería exactamente 'es igual' sino mas general etc (hay que verlo bien)
 							return (teoria.getAccionComoAction());
 						}
 					}
@@ -68,6 +74,19 @@ public class Agent extends AbstractMultiPlayer {
 		return (ACTIONS.ACTION_NIL);
 	}
 	
+	private ArrayList<Situacion> obtenerSituacionesConocidas() {
+		ArrayList<Situacion> situacionesConocidas = new ArrayList<Situacion>();
+		for (Teoria teoria: teorias) {
+			if (teoria != null) {
+				Situacion condicionInicial = teoria.getSitCondicionInicial();
+				Situacion efectosPredichos = teoria.getSitEfectosPredichos();
+				situacionesConocidas.add(condicionInicial);
+				situacionesConocidas.add(efectosPredichos);
+			}
+		}
+		return situacionesConocidas;
+	}
+
 	//Realiza un movimiento random.
 	private ontology.Types.ACTIONS RealizarMovimientoRandom(StateObservationMulti stateObs){
 		ArrayList<ACTIONS> a = stateObs.getAvailableActions(this.playerID);
