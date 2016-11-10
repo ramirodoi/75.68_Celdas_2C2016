@@ -26,6 +26,8 @@ public class Perception {
 	private int levelHeight;
 	private int spriteSizeWidthInPixels;
 	private int spriteSizeHeightInPixels;
+	private int posPersonajeX;
+	private int posPersonajeY;
 
 	
 	public Perception(StateObservationMulti stateObs){
@@ -42,6 +44,8 @@ public class Perception {
 	        this.spriteSizeHeightInPixels =  stateObs.getWorldDimension().height / levelHeight;
 
 	        this.level = new char[levelHeight][levelWidth];
+	        
+	        
 	        for(int i=0;i< levelWidth; i++){
 	        	for(int j=0;j< levelHeight; j++){
 	        		observationList = (grid[i][j]);
@@ -57,6 +61,8 @@ public class Perception {
 	        			 }else if(o.category == 0){        				 
 	        				 if(o.itype == 5){
 	        					 this.level[j][i] = 'A';
+	        					 this.posPersonajeX = i;
+	        					 this.posPersonajeY = j;
 	        				 }else if(o.itype == 6){
 	        					 this.level[j][i] = 'B';
 	        				 }
@@ -106,6 +112,14 @@ public class Perception {
 	
 	public int getSpriteSizeHeightInPixels() {
 		return spriteSizeHeightInPixels;
+	}
+	
+	public int getPosicionPersonajeX() {
+		return posPersonajeX;
+	}
+	
+	public int getPosicionPersonajeY() {
+		return posPersonajeY;
 	}
 	
 	public String toString(){

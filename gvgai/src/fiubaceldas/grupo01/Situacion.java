@@ -25,4 +25,15 @@ public class Situacion {
 		this.casilleros = casilleros;
 	}
 	
+	public String toString() {
+		StringBuilder sb = new StringBuilder("");
+		for(int i = 0;i < 7; i++){
+		        for(int j = 0;j < 7; j++){
+		        	sb.append(casilleros[i][j]);
+		        }
+		        sb.append("\n");
+		}		
+		return sb.toString();
+	}
+	
 }

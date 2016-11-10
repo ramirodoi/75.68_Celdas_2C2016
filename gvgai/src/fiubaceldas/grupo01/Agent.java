@@ -19,6 +19,7 @@ import core.game.StateObservationMulti;
 import core.player.AbstractMultiPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
+import tools.Vector2d;
 
 public class Agent extends AbstractMultiPlayer {
 	private Path path = FileSystems.getDefault().getPath(System.getProperty("user.dir") + "\\src\\fiubaceldas\\grupo01\\Teorias");
@@ -91,6 +92,29 @@ public class Agent extends AbstractMultiPlayer {
 		}
 		
 		return(null);
+	}
+	
+	private char[][] obtenerCasillerosSitActual() {
+		char[][] casillerosNivel = medioManager.getLevel();
+		char[][] casillerosSituacion = new char[7][7];
+		int posXPersonaje = medioManager.getPosicionPersonajeX();
+		int posYPersonaje = medioManager.getPosicionPersonajeY();
+		int anchoMapa = medioManager.getLevelWidth();
+		int altoMapa = medioManager.getLevelHeight();
+		int iSit = 0;
+		for (int i = posXPersonaje - 3; i <= posXPersonaje + 3; i++) {
+			int jSit = 0;
+			for (int j = posYPersonaje - 3; j <= posYPersonaje + 3; j++){
+				if (i >= 0 && i < anchoMapa && j >= 0 && j < altoMapa) {
+					casillerosSituacion[iSit][jSit] = casillerosNivel[i][j];
+				} else {
+					casillerosSituacion[iSit][jSit] = '?';
+				}
+				jSit++;
+			}
+			iSit++;
+		} 
+		return casillerosSituacion;
 	}
 	
 	//Guarda una teoria en formato JSON.

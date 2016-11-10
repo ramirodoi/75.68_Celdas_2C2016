@@ -1,6 +1,7 @@
 package fiubaceldas.grupo01;
 
 import ontology.Types.ACTIONS;
+import fiubaceldas.grupo01.Situacion;
 
 public class Teoria {
 	private int id;
@@ -143,4 +144,26 @@ public class Teoria {
 	public void setU(double u) {
 		this.u = u;
 	}
+	
+	public Situacion getSitCondicionInicial() {
+		String[] filas = condicionInicial.split("\\n");
+		char[][] casillerosSit = new char[7][7];
+		for (int i = 0; i < 7; i++) {
+			for (int j = 0; j < 7; j++) {
+				casillerosSit[j][i] = filas[j].charAt(i);
+			}
+		}
+		return new Situacion(idSitCondicionInicial, casillerosSit);
+	}
+	
+	public Situacion getSitEfectosPredichos() {
+		String[] filas = efectosPredichos.split("\\n");
+		char[][] casillerosSit = new char[7][7];
+		for (int i = 0; i < 7; i++) {
+			for (int j = 0; j < 7; j++) {
+				casillerosSit[j][i] = filas[j].charAt(i);
+			}
+		}
+		return new Situacion(idSitEfectosPredichos, casillerosSit);
+	}	
 }
