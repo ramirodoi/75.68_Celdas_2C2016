@@ -49,9 +49,8 @@ public class Agent extends AbstractMultiPlayer {
 					//TODO: calcular la utilidad para que siempre agarre la mejor y no la primera de la lista.
 					if (teoria.getU() > 0){
 						Situacion sitCondicionInicial = teoria.getSitCondicionInicial();
-						if (situacionActual.esIgualA(sitCondicionInicial)){
-							//TODO: ver cómo se hace para comparar los efectos predichos.
-							//no sería exactamente 'es igual' sino mas general etc (hay que verlo bien)
+						if (sitCondicionInicial.incluyeA(situacionActual)){
+							//TODO: ver mejor cuando se aplican las heuristicas
 							return (teoria.getAccionComoAction());
 						}
 					}
