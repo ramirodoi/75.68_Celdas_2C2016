@@ -1,10 +1,10 @@
 [
 {
   "id": 1,
-  "condicionInicial": "wwwwwwwww\nwA..wwwww\nw.11wwwww\nw.1.www0w\nwww.www0w\nwww....0w\nww.B.w..w\nww...wwww\nwwwwwwwww\n",
+  "condicionInicial": "???????\n???????\n??wwwww\n??wA..w\n??w.11w\n??w.1.w\n??www.w\n",
   "idSitCondicionInicial": 1,
   "accion": "derecha",
-  "efectosPredichos": "wwwwwwwww\nwA..wwwww\nw.11wwwww\nw.1.www0w\nwww.www0w\nwww....0w\nww..Bw..w\nww...wwww\nwwwwwwwww\n",
+  "efectosPredichos": "???????\n???????\n??wwwww\n??w.A.w\n??w.11w\n??w.1.w\n??www.w\n",
   "idSitEfectosPredichos": 2,
   "k": 1.0,
   "p": 1.0,
@@ -12,10 +12,10 @@
 },
 {
   "id": 2,
-  "condicionInicial": "wwwwwwwww\nwA..wwwww\nw.11wwwww\nw.1.www0w\nwww.www0w\nwww....0w\nww..Bw..w\nww...wwww\nwwwwwwwww\n",
+  "condicionInicial": "???????\n???????\n??wwwww\n??w.A.w\n??w.11w\n??w.1.w\n??www.w\n",
   "idSitCondicionInicial": 2,
-  "accion": "abajo",
-  "efectosPredichos": "wwwwwwwww\nwA..wwwww\nw.11wwwww\nw.1.www0w\nwww.www0w\nwww....0w\nww...w..w\nww..Bwwww\nwwwwwwwww\n",
+  "accion": "derecha",
+  "efectosPredichos": "???????\n???????\n??wwwww\n??w..Aw\n??w.11w\n??w.1.w\n??www.w\n",
   "idSitEfectosPredichos": 3,
   "k": 1.0,
   "p": 1.0,
