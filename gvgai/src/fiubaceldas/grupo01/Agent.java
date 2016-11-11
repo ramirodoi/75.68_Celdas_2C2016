@@ -169,14 +169,16 @@ public class Agent extends AbstractMultiPlayer {
 		
 		for (Teoria teoria: this.teorias) {
 			if (teoria != null) {
-				String idTeoria = Integer.toString(teoria.getId());
-				String idSitOrigen = Integer.toString(teoria.getIdSitCondicionInicial());
-				String idSitDestino = Integer.toString(teoria.getIdSitEfectosPredichos());
-				Vertex verticeOrigen = verticesPorId.get(idSitOrigen);
-				Vertex verticeDestino = verticesPorId.get(idSitDestino);
-				int peso = (int)((teoria.getP()/teoria.getK())*100);
-				Edge aristaTeoria = new Edge(idTeoria, verticeOrigen, verticeDestino, peso);
-				aristasTeorias.add( aristaTeoria);
+				if (teoria.getU() != 0) {
+					String idTeoria = Integer.toString(teoria.getId());
+					String idSitOrigen = Integer.toString(teoria.getIdSitCondicionInicial());
+					String idSitDestino = Integer.toString(teoria.getIdSitEfectosPredichos());
+					Vertex verticeOrigen = verticesPorId.get(idSitOrigen);
+					Vertex verticeDestino = verticesPorId.get(idSitDestino);
+					int peso = (int)((teoria.getP()/teoria.getK())*100);
+					Edge aristaTeoria = new Edge(idTeoria, verticeOrigen, verticeDestino, peso);
+					aristasTeorias.add( aristaTeoria);
+				}
 			}
 		}
 		return new Graph(verticesSituaciones, aristasTeorias);
