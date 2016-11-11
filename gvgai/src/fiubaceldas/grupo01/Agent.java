@@ -42,6 +42,7 @@ public class Agent extends AbstractMultiPlayer {
 		this.medioManager =  new Perception(stateObs);
 		this.teorias = this.ObtenerTeorias();
 		this.situacionesConocidas = this.obtenerSituacionesConocidas();
+		Graph grafoTeoriasYSituaciones = this.obtenerGrafoTeoriasYSituaciones();
 		Situacion situacionActual = new Situacion(this.situacionesConocidas.size()+1,this.obtenerCasillerosSitActual());
 		
 		if (teorias != null){
@@ -81,8 +82,24 @@ public class Agent extends AbstractMultiPlayer {
 			if (teoria != null) {
 				Situacion condicionInicial = teoria.getSitCondicionInicial();
 				Situacion efectosPredichos = teoria.getSitEfectosPredichos();
-				situacionesConocidas.add(condicionInicial);
-				situacionesConocidas.add(efectosPredichos);
+				
+				boolean agregarCI = true;
+				boolean agregarEP = true;
+				
+				for (Situacion situacion: situacionesConocidas) {
+					
+					if (situacion.getId() == condicionInicial.getId())
+						agregarCI = false;
+					
+					if (situacion.getId() == efectosPredichos.getId())
+						agregarEP = false;
+				}
+				
+				if (agregarCI)
+					situacionesConocidas.add(condicionInicial);
+				
+				if (agregarEP)
+					situacionesConocidas.add(efectosPredichos);
 			}
 		}
 		return situacionesConocidas;
@@ -151,14 +168,16 @@ public class Agent extends AbstractMultiPlayer {
 		}
 		
 		for (Teoria teoria: this.teorias) {
-			String idTeoria = Integer.toString(teoria.getId());
-			String idSitOrigen = Integer.toString(teoria.getIdSitCondicionInicial());
-			String idSitDestino = Integer.toString(teoria.getIdSitEfectosPredichos());
-			Vertex verticeOrigen = verticesPorId.get(idSitOrigen);
-			Vertex verticeDestino = verticesPorId.get(idSitDestino);
-			int peso = (int)((teoria.getP()/teoria.getK())*100);
-			Edge aristaTeoria = new Edge(idTeoria, verticeOrigen, verticeDestino, peso);
-			aristasTeorias.add( aristaTeoria);
+			if (teoria != null) {
+				String idTeoria = Integer.toString(teoria.getId());
+				String idSitOrigen = Integer.toString(teoria.getIdSitCondicionInicial());
+				String idSitDestino = Integer.toString(teoria.getIdSitEfectosPredichos());
+				Vertex verticeOrigen = verticesPorId.get(idSitOrigen);
+				Vertex verticeDestino = verticesPorId.get(idSitDestino);
+				int peso = (int)((teoria.getP()/teoria.getK())*100);
+				Edge aristaTeoria = new Edge(idTeoria, verticeOrigen, verticeDestino, peso);
+				aristasTeorias.add( aristaTeoria);
+			}
 		}
 		return new Graph(verticesSituaciones, aristasTeorias);
 	}
