@@ -9,6 +9,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import com.google.gson.Gson;
@@ -20,7 +21,6 @@ import core.player.AbstractMultiPlayer;
 import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tools.Vector2d;
-
 import graph.*;
 
 public class Agent extends AbstractMultiPlayer {
@@ -135,6 +135,32 @@ public class Agent extends AbstractMultiPlayer {
 			iSit++;
 		} 
 		return casillerosSituacion;
+	}
+	
+	private Graph obtenerGrafoTeoriasYSituaciones() {
+		ArrayList<Vertex> verticesSituaciones = new ArrayList<Vertex>();
+		HashMap<String, Vertex> verticesPorId = new HashMap<String, Vertex>();
+		
+		ArrayList<Edge> aristasTeorias = new ArrayList<Edge>();
+		
+		for (Situacion situacion: situacionesConocidas) {
+			String idSituacion = Integer.toString(situacion.getId());
+			Vertex verticeSituacion = new Vertex(idSituacion, idSituacion);
+			verticesSituaciones.add(verticeSituacion);
+			verticesPorId.put(idSituacion, verticeSituacion);
+		}
+		
+		for (Teoria teoria: this.teorias) {
+			String idTeoria = Integer.toString(teoria.getId());
+			String idSitOrigen = Integer.toString(teoria.getIdSitCondicionInicial());
+			String idSitDestino = Integer.toString(teoria.getIdSitEfectosPredichos());
+			Vertex verticeOrigen = verticesPorId.get(idSitOrigen);
+			Vertex verticeDestino = verticesPorId.get(idSitDestino);
+			int peso = (int)((teoria.getP()/teoria.getK())*100);
+			Edge aristaTeoria = new Edge(idTeoria, verticeOrigen, verticeDestino, peso);
+			aristasTeorias.add( aristaTeoria);
+		}
+		return new Graph(verticesSituaciones, aristasTeorias);
 	}
 	
 	//Guarda una teoria en formato JSON.
