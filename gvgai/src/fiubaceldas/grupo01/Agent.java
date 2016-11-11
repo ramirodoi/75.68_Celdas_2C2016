@@ -55,6 +55,7 @@ public class Agent extends AbstractMultiPlayer {
 									calcularUtilidadTeoria(situacionAnterior, situacionActual));
 		
 		evaluarTeoria(teoriaLocal); 
+//		GuardarTeorias(this.teorias);
 		
 		ACTIONS siguienteAccion = calcularAccionYActualizarPlan(stateObs, situacionActual, grafoTeoriasYSituaciones);
 		
@@ -83,14 +84,6 @@ public class Agent extends AbstractMultiPlayer {
 			return (this.RealizarMovimientoRandom(stateObs));
 		}
 		*/
-		
-		//TODO: Guardar las teorías aprendidas de esta forma...
-		/*
-		ArrayList<Teoria> teorias2 = new ArrayList<>();
-		teorias2.add(new Teoria("inicio", "derecha", "final", 123, 123, 123));
-		teorias2.add(new Teoria("inicio", "izquierda", "final", 321, 321, 321));
-		this.GuardarTeorias(teorias2);
-	 	*/
 		
 	}
 	
