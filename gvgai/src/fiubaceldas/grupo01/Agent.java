@@ -31,6 +31,7 @@ public class Agent extends AbstractMultiPlayer {
 	private ArrayList<Teoria> teorias;
 	private ArrayList<Situacion> situacionesConocidas;
 	private Situacion situacionAnterior = null;
+	private ArrayList<Situacion> plan = null;
 	
 	public Agent(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer, int playerID) {
 		this.medioManager =  new Perception(stateObs);
