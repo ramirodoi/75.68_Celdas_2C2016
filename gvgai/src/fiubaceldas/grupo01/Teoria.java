@@ -31,6 +31,20 @@ public class Teoria {
 		this.setU(u);
 	}
 
+	public Teoria(int id, Situacion condicionInicial, ACTIONS accion, 
+				  Situacion efectosPredichos, double k, 
+				  double p, double u) {
+		this.setId(id);
+		this.setCondicionInicial(condicionInicial);
+		this.setIdSitCondicionInicial(condicionInicial.getId());
+		this.setEfectosPredichos(efectosPredichos);
+		this.setIdSitEfectosPredichos(efectosPredichos.getId());
+		this.setAccion(accion);
+		this.setK(k);
+		this.setP(p);
+		this.setU(u);
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -45,6 +59,34 @@ public class Teoria {
 
 	public void setCondicionInicial(String condicionInicial) {
 		this.condicionInicial = condicionInicial;
+	}
+	
+	public void setCondicionInicial(Situacion condicionInicial) {
+		setCondicionInicial(obtenerSituacionComoString(condicionInicial));
+	}
+	
+	public String getEfectosPredichos() {
+		return efectosPredichos;
+	}
+
+	public void setEfectosPredichos(String efectosPredichos) {
+		this.efectosPredichos = efectosPredichos;
+	}
+	
+	public void setEfectosPredichos(Situacion efectosPredichos) {
+		this.setEfectosPredichos(obtenerSituacionComoString(efectosPredichos));
+	}
+	
+	private String obtenerSituacionComoString(Situacion situacion) {
+		Simbolo[][] casillerosSituacion = situacion.getCasilleros();
+		String situacionString = "";
+		for (int fila = 0; fila < 7; fila++) {
+			for (int col = 0; col < 7; col++) {
+				situacionString += casillerosSituacion[fila][col].getSimbolo();
+			}
+			situacionString += "\n";
+		}
+		return situacionString;
 	}
 	
 	public int getIdSitCondicionInicial() {
@@ -105,13 +147,6 @@ public class Teoria {
 		}
 	}
 
-	public String getEfectosPredichos() {
-		return efectosPredichos;
-	}
-
-	public void setEfectosPredichos(String efectosPredichos) {
-		this.efectosPredichos = efectosPredichos;
-	}
 	
 	public int getIdSitEfectosPredichos() {
 		return idSitEfectosPredichos;

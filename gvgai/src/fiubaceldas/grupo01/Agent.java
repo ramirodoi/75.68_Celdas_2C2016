@@ -30,6 +30,7 @@ public class Agent extends AbstractMultiPlayer {
 	private int playerID;
 	private ArrayList<Teoria> teorias;
 	private ArrayList<Situacion> situacionesConocidas;
+	private Situacion situacionAnterior = null;
 	
 	public Agent(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer, int playerID) {
 		this.medioManager =  new Perception(stateObs);
@@ -43,7 +44,14 @@ public class Agent extends AbstractMultiPlayer {
 		this.teorias = this.ObtenerTeorias();
 		this.situacionesConocidas = this.obtenerSituacionesConocidas();
 		Graph grafoTeoriasYSituaciones = this.obtenerGrafoTeoriasYSituaciones();
+		
+		ACTIONS ultimaAccion = stateObs.getAvatarLastAction();
 		Situacion situacionActual = new Situacion(this.situacionesConocidas.size()+1,this.obtenerCasillerosSitActual());
+		
+		Teoria teoriaLocal = null;		
+		if (situacionAnterior != null)
+			teoriaLocal = new Teoria(teorias.size()+1, situacionAnterior, ultimaAccion,situacionActual, 1, 1, 
+									calcularUtilidadTeoria(situacionAnterior, situacionActual));
 		
 		if (teorias != null){
 			for (Teoria teoria : teorias) {
@@ -74,6 +82,12 @@ public class Agent extends AbstractMultiPlayer {
 	 	*/
 		
 		return (ACTIONS.ACTION_NIL);
+	}
+	
+	
+	private double calcularUtilidadTeoria(Situacion condicionInicial, Situacion efectosPredichos) {
+		//TODO
+		return 1;
 	}
 	
 	private ArrayList<Situacion> obtenerSituacionesConocidas() {
