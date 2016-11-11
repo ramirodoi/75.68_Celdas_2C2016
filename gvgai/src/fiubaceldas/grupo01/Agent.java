@@ -21,6 +21,8 @@ import ontology.Types.ACTIONS;
 import tools.ElapsedCpuTimer;
 import tools.Vector2d;
 
+import graph.*;
+
 public class Agent extends AbstractMultiPlayer {
 	private Path path = FileSystems.getDefault().getPath(System.getProperty("user.dir") + "\\src\\fiubaceldas\\grupo01\\Teorias");
 	private Perception medioManager;
