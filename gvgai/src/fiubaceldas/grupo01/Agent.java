@@ -31,7 +31,7 @@ public class Agent extends AbstractMultiPlayer {
 	private ArrayList<Teoria> teorias;
 	private ArrayList<Situacion> situacionesConocidas;
 	private Situacion situacionAnterior = null;
-	private Plan plan = null;
+	private Plan plan = new Plan();
 	
 	public Agent(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer, int playerID) {
 		this.medioManager =  new Perception(stateObs);
@@ -63,28 +63,6 @@ public class Agent extends AbstractMultiPlayer {
 		
 		return siguienteAccion;
 		
-		/*
-		if (teorias != null){
-			for (Teoria teoria : teorias) {
-				
-				if (teoria != null){
-					//TODO: calcular la utilidad para que siempre agarre la mejor y no la primera de la lista.
-					if (teoria.getU() > 0){
-						Situacion sitCondicionInicial = teoria.getSitCondicionInicial();
-						if (sitCondicionInicial.incluyeA(situacionActual)){
-							//TODO: ver mejor cuando se aplican las heuristicas
-							return (teoria.getAccionComoAction());
-						}
-					}
-				} else {
-					return (this.RealizarMovimientoRandom(stateObs));
-				}
-			}
-		} else {			
-			return (this.RealizarMovimientoRandom(stateObs));
-		}
-		*/
-		
 	}
 	
 	
@@ -99,9 +77,58 @@ public class Agent extends AbstractMultiPlayer {
 	
 	private ACTIONS calcularAccionYActualizarPlan(StateObservationMulti stateObs, Situacion situacionActual, 
 												Graph grafoTeoriasYSituaciones) {
+		if (plan.enEjecucion()) {
+			if (plan.cumpleElPlan(situacionActual)) {
+				if (!plan.seLlegoAlObjetivo()) {
+					return plan.ejecutarSiguienteAccion();
+				} else {
+					if (plan.getUtilidadObjetivo() == 1) {
+						//TODO: GANÓ
+						return null;
+						
+					//Se puede haber llegado al obj del plan pero no ser el obj del juego	
+					} else {
+						plan.reiniciar();
+						return this.RealizarMovimientoRandom(stateObs);
+					}
+				}
+			//Si se estaba ejecutando un plan para llegar a un obj pero falla la última predicción	
+			} else {
+				Situacion objetivoActual = plan.obtenerSituacionObjetivo();
+				plan.reiniciar();
+				
+				//Se calcula un nuevo camino a ver si se puede llegar al obj desde donde está ahora
+				armarNuevoPlan(objetivoActual);
+				
+				//Si se encontró un nuevo camino lo ejecuta
+				if (plan.enEjecucion())
+					return plan.ejecutarSiguienteAccion();
+				else
+					return this.RealizarMovimientoRandom(stateObs);
+			}
+		} else {
+			Teoria teoriaNuevoObjetivo = obtenerTeoriaConMayorUtilidad();
+			if (teoriaNuevoObjetivo == null) {
+				// Esto va a pasar al principio (todavía no hay teorías)
+				return this.RealizarMovimientoRandom(stateObs); 
+			}
+			
+			Situacion nuevoObjetivo = teoriaNuevoObjetivo.getSitEfectosPredichos();
+			armarNuevoPlan(nuevoObjetivo);
+			if (plan.enEjecucion())
+				return plan.ejecutarSiguienteAccion();
+			else
+				return this.RealizarMovimientoRandom(stateObs);
+		}
+	}
+	
+	private Teoria obtenerTeoriaConMayorUtilidad() {
 		//TODO
-		
-		return this.RealizarMovimientoRandom(stateObs);
+		return null;
+	}
+	
+	private void armarNuevoPlan(Situacion situacionObjetivo) {
+		//TODO (acá hay que usar el grafo)
 	}
 	
 	private ArrayList<Situacion> obtenerSituacionesConocidas() {

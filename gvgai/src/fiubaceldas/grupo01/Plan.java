@@ -21,13 +21,47 @@ public class Plan {
 		return accionAEjecutar;
 	}
 	
+	public double getUtilidadObjetivo() {
+		return this.utilidadObjetivo;
+	}
+	
+	public boolean enEjecucion() {
+		return (utilidadObjetivo > 0);
+	}
+	
+	boolean seLlegoAlObjetivo() {
+		return nroUltimaAccionEjecutada == accionesPlan.size() - 1;
+	}
+	
 	public boolean cumpleElPlan(Situacion situacionActual) {
-		return (situacionesPlan.get(nroUltimaAccionEjecutada).esIgualA(situacionActual));
+		if (nroUltimaAccionEjecutada >= 0)
+			return (situacionesPlan.get(nroUltimaAccionEjecutada).esIgualA(situacionActual));
+		return false;
+	}
+	
+	public Situacion obtenerSituacionObjetivo() {
+		if (situacionesPlan.size() > 0)
+			return situacionesPlan.get(situacionesPlan.size() - 1);
+		return null;
+	}
+	
+	public void inicializarNuevoPlan(ArrayList<Situacion> situacionesPlan, ArrayList<ACTIONS> accionesPlan, 
+										double utilidadObjetivo) {
+		this.reiniciar();
+		
+		for (Situacion situcionPlan: situacionesPlan)
+			this.situacionesPlan.add(situcionPlan);
+		
+		for (ACTIONS accionPlan: accionesPlan)
+			this.accionesPlan.add(accionPlan);
+		
+		this.utilidadObjetivo = utilidadObjetivo;
+		
 	}
 	
 	public void reiniciar() {
-		situacionesPlan = new ArrayList<Situacion>();
-		accionesPlan = new ArrayList<ACTIONS>();
+		situacionesPlan.clear();
+		accionesPlan.clear();
 		nroUltimaAccionEjecutada = -1;
 		utilidadObjetivo = -1;
 	}
