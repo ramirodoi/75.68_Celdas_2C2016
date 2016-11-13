@@ -68,4 +68,18 @@ public class Situacion {
 		return sb.toString();
 	}
 	
+	// Devuelve la cantidad de elemntos en el cuadrado de 7x7.
+	public int obtenerCantidadDeElementos(String elementosAContar){
+		int cantidadDeElementos = 0;
+		
+		for (int fila = 0; fila < 7; fila++){
+			for (int col = 0; col < 7; col++){
+				if (this.casilleros[fila][col].getSimbolo().equals(elementosAContar)){
+					cantidadDeElementos++;
+				}
+			}
+		}
+		
+		return (cantidadDeElementos);
+	}
 }

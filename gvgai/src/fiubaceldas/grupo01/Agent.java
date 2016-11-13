@@ -24,7 +24,8 @@ import tools.Vector2d;
 import graph.*;
 
 public class Agent extends AbstractMultiPlayer {
-	private Path path = FileSystems.getDefault().getPath(System.getProperty("user.dir") + "\\src\\fiubaceldas\\grupo01\\Teorias");
+	private Path pathTeorias = FileSystems.getDefault().getPath(System.getProperty("user.dir") + "\\src\\fiubaceldas\\grupo01\\Teorias");
+	private Path pathTeoriasPrecargadas = FileSystems.getDefault().getPath(System.getProperty("user.dir") + "\\src\\fiubaceldas\\grupo01\\TeoriasPrecargadas");
 	private Perception medioManager;
 	private Gson gsonManager;
 	private int playerID;
@@ -37,10 +38,11 @@ public class Agent extends AbstractMultiPlayer {
 		this.medioManager =  new Perception(stateObs);
 		this.gsonManager = new GsonBuilder().setPrettyPrinting().create();
 		this.playerID = playerID;
+		this.teorias = this.ObtenerTeoriasPrecargadas();
 	}
 	
 	@Override
-	public ACTIONS act(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer){	
+	public ACTIONS act(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer){
 		this.medioManager =  new Perception(stateObs);
 		this.teorias = this.ObtenerTeorias();
 		this.situacionesConocidas = this.obtenerSituacionesConocidas();
@@ -55,7 +57,7 @@ public class Agent extends AbstractMultiPlayer {
 									calcularUtilidadTeoria(situacionAnterior, situacionActual));
 		
 		evaluarTeoria(teoriaLocal); 
-//		GuardarTeorias(this.teorias);
+		this.GuardarTeorias(this.teorias);
 		
 		ACTIONS siguienteAccion = calcularAccionYActualizarPlan(stateObs, situacionActual, grafoTeoriasYSituaciones);
 		
@@ -67,12 +69,34 @@ public class Agent extends AbstractMultiPlayer {
 	
 	
 	private double calcularUtilidadTeoria(Situacion condicionInicial, Situacion efectosPredichos) {
-		//TODO
-		return 1;
+		int cantidadDePuntitosDeLlegada = efectosPredichos.obtenerCantidadDeElementos("0");
+		int cantidadDeCajas = efectosPredichos.obtenerCantidadDeElementos("1");
+		int cantidadTotal = cantidadDePuntitosDeLlegada + cantidadDeCajas;
+		
+		return (1 - (1.0/cantidadTotal));
 	}
 	
 	private void evaluarTeoria(Teoria teoriaLocal) {
-		//TODO
+		if (teoriaLocal != null) {
+			boolean encontroTeoria = false;
+			
+			for (Teoria teoria : this.teorias) {
+				if (teoria != null) {
+					if (teoria.getSitCondicionInicial().incluyeA(teoriaLocal.getSitCondicionInicial())){
+						encontroTeoria = true;
+						teoria.setK(teoria.getK() + 1);
+						
+						if (teoriaLocal.getSitEfectosPredichos().incluyeA(teoria.getSitEfectosPredichos())){
+							teoria.setP(teoria.getP() + 1);
+						}
+					}
+				}
+			}
+			
+			if (!encontroTeoria){
+				this.teorias.add(teoriaLocal);
+			}
+		}
 	}
 	
 	private ACTIONS calcularAccionYActualizarPlan(StateObservationMulti stateObs, Situacion situacionActual, 
@@ -123,8 +147,17 @@ public class Agent extends AbstractMultiPlayer {
 	}
 	
 	private Teoria obtenerTeoriaConMayorUtilidad() {
-		//TODO
-		return null;
+		double utilidadMAX = 0;
+		Teoria teoriaConUtilidadMax = null;
+		
+		for (Teoria teoria : this.teorias) {
+			if (teoria.getU() >= utilidadMAX){
+				utilidadMAX = teoria.getU();
+				teoriaConUtilidadMax = teoria;
+			}
+		}
+		
+		return (teoriaConUtilidadMax);
 	}
 	
 	private void armarNuevoPlan(Situacion situacionObjetivo) {
@@ -172,13 +205,34 @@ public class Agent extends AbstractMultiPlayer {
 		Type tipoArrayListTeoria = new TypeToken<ArrayList<Teoria>>(){}.getType();
 		ArrayList<Teoria> teorias = gsonManager.fromJson(this.ObtenerPathDeTeorias(), tipoArrayListTeoria);
 		
-		return (teorias);
+		this.teorias.addAll(teorias);
+		
+		return (this.teorias);
+	}
+	
+	//Obtiene todas las Teorias desde el archivo.
+	private ArrayList<Teoria> ObtenerTeoriasPrecargadas(){
+		Type tipoArrayListTeoria = new TypeToken<ArrayList<Teoria>>(){}.getType();
+		ArrayList<Teoria> teoriasPrecargadas = gsonManager.fromJson(this.ObtenerPathDeTeoriasPrecargadas(), tipoArrayListTeoria);
+		
+		return (teoriasPrecargadas);
 	}
 	
 	//Devuelve el path como String para poder leerlo como JSON.
 	private String ObtenerPathDeTeorias(){
 		try {
-			return(new String(Files.readAllBytes(this.path)));
+			return(new String(Files.readAllBytes(this.pathTeorias)));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return(null);
+	}
+	
+	//Devuelve el path como String para poder leerlo como JSON.
+	private String ObtenerPathDeTeoriasPrecargadas(){
+		try {
+			return(new String(Files.readAllBytes(this.pathTeoriasPrecargadas)));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -242,14 +296,18 @@ public class Agent extends AbstractMultiPlayer {
 	//Guarda una teoria en formato JSON.
 	private void GuardarTeorias(ArrayList<Teoria> teorias){
 		try {
-			FileOutputStream out = new FileOutputStream(this.path.toString());
+			FileOutputStream out = new FileOutputStream(this.pathTeorias.toString());
 			out.write("[\n".getBytes());
 			
-			for (Teoria teoria : teorias) {
-				out.write((gsonManager.toJson(teoria) + ",\n").getBytes());
+			for (int i = 0; i < teorias.size(); i++) {
+				out.write(gsonManager.toJson(teorias.get(i)).getBytes());
+				
+				if (i != teorias.size()-1) {
+					out.write((",\n").getBytes());	
+				}
 			}
 			
-			out.write("]".getBytes());
+			out.write("\n]".getBytes());
 			out.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
