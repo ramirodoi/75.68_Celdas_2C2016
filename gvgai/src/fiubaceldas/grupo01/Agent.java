@@ -49,26 +49,23 @@ public class Agent extends AbstractMultiPlayer {
 		this.ObtenerTodasLasTeorias();
 		this.situacionesConocidas = this.obtenerSituacionesConocidas();
 		
-		if (this.teorias.size() == 0 && this.situacionAnterior != null)
+		if (this.teorias.size() == 0 && this.situacionAnterior != null) {
 			this.situacionesConocidas.add(situacionAnterior);
+		}
 		
-		Graph grafoTeoriasYSituaciones = this.obtenerGrafoTeoriasYSituaciones();
-		
-		ACTIONS ultimaAccion = stateObs.getAvatarLastAction();
 		Situacion situacionActual = new Situacion(this.situacionesConocidas.size()+1,this.obtenerCasillerosSitActual());
 		this.situacionesConocidas.add(situacionActual);
+				
+		if (situacionAnterior != null){
+			Teoria teoriaLocal = new Teoria(this.teorias.size()+this.teoriasPrecargadas.size()+ 1, this.situacionAnterior, stateObs.getAvatarLastAction(), situacionActual, 1, 1, 
+									calcularUtilidadTeoria(this.situacionAnterior, situacionActual));
+			evaluarTeoria(teoriaLocal);
+		}
 		
-		Teoria teoriaLocal = null;		
-		if (situacionAnterior != null)
-			teoriaLocal = new Teoria(teorias.size()+teoriasPrecargadas.size()+ 1, situacionAnterior, ultimaAccion,situacionActual, 1, 1, 
-									calcularUtilidadTeoria(situacionAnterior, situacionActual));
-		
-		evaluarTeoria(teoriaLocal); 
-		this.GuardarTeorias();
-		
-		ACTIONS siguienteAccion = calcularAccionYActualizarPlan(stateObs, situacionActual, grafoTeoriasYSituaciones);
-		
+		ACTIONS siguienteAccion = calcularAccionYActualizarPlan(stateObs, situacionActual, this.obtenerGrafoTeoriasYSituaciones());
 		this.situacionAnterior = situacionActual;
+		
+		this.GuardarTeorias();
 		
 		return siguienteAccion;
 	}

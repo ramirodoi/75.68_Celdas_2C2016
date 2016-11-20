@@ -25,7 +25,7 @@ public class TestMultiPlayerCeldas
         String agentController = "fiubaceldas.grupo01.Agent";
 
         //definir acá los controladores usados para el juego (se necesitan 2 controladores separados por un espacio)
-        String controllers = agentController + " " + agentController;
+        String controllers = agentController + " " + doNothingController;
         //String controllers = sampleOLMCTSController + " " + sampleOLMCTSController;
 
         //ubicación de los juegos disponibles:
