@@ -9,8 +9,10 @@ public abstract class Simbolo {
 	}
 	
 	public boolean esIgualA(Simbolo otroSimbolo) {
-		if (otroSimbolo.getSimbolo().equals(simbolo))
+		if ((otroSimbolo.getSimbolo().equals("?")) || (otroSimbolo.getSimbolo().equals(simbolo))){
 			return true;
+		}
+			
 		return false;
 	}
 	

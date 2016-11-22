@@ -144,11 +144,17 @@ public class Agent extends AbstractMultiPlayer {
 			
 			Situacion nuevoObjetivo = teoriaNuevoObjetivo.getSitEfectosPredichos();
 			armarNuevoPlan(nuevoObjetivo, grafoTeoriasYSituaciones);
+			
 			if (plan.enEjecucion())
 				return plan.ejecutarSiguienteAccion();
 			else
 				return this.RealizarMovimientoRandom(stateObs);
 		}
+	}
+	
+	private void armarNuevoPlan(Situacion situacionObjetivo, Graph grafoTeoriasYSituaciones) {
+		//TODO (acá hay que usar el grafo)
+		this.obtenerTeoriaConMayorUtilidad();
 	}
 	
 	private Teoria obtenerTeoriaConMayorUtilidad() {
@@ -163,11 +169,6 @@ public class Agent extends AbstractMultiPlayer {
 		}
 		
 		return (teoriaConUtilidadMax);
-	}
-	
-	private void armarNuevoPlan(Situacion situacionObjetivo, Graph grafoTeoriasYSituaciones) {
-		//TODO (acá hay que usar el grafo)
-		this.obtenerTeoriaConMayorUtilidad();
 	}
 	
 	private ArrayList<Situacion> obtenerSituacionesConocidas() {

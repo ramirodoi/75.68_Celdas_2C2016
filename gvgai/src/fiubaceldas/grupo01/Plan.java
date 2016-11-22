@@ -9,6 +9,10 @@ public class Plan {
 	ArrayList<ACTIONS> accionesPlan = new ArrayList<ACTIONS>();
 	int nroUltimaAccionEjecutada = -1;
 	double utilidadObjetivo = -1;
+	/*
+	public Plan (ArrayList<Teoria> listaTeorias) {
+	}
+	*/
 	
 	public ACTIONS ejecutarSiguienteAccion() {
 		ACTIONS accionAEjecutar;
