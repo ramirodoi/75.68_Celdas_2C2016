@@ -9,11 +9,7 @@ public abstract class Simbolo {
 	}
 	
 	public boolean esIgualA(Simbolo otroSimbolo) {
-		if ((otroSimbolo.getSimbolo().equals("?")) || (otroSimbolo.getSimbolo().equals(simbolo))){
-			return true;
-		}
-			
-		return false;
+		return this.simbolo.equals(otroSimbolo.getSimbolo());
 	}
 	
 	public abstract boolean incluyeA(Simbolo otroSimbolo);

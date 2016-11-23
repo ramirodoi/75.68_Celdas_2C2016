@@ -49,12 +49,11 @@ public class Agent extends AbstractMultiPlayer {
 		this.ObtenerTodasLasTeorias();
 		this.situacionesConocidas = this.obtenerSituacionesConocidas();
 		
-		if (this.teorias.size() == 0 && this.situacionAnterior != null) {
-			this.situacionesConocidas.add(situacionAnterior);
+		if (this.situacionAnterior != null) {
+			agregarNuevaSituacion(situacionAnterior);
 		}
 		
-		Situacion situacionActual = new Situacion(this.situacionesConocidas.size()+1,this.obtenerCasillerosSitActual());
-		this.situacionesConocidas.add(situacionActual);
+		Situacion situacionActual = this.obtenerSituacionActual();
 				
 		if (situacionAnterior != null){
 			Teoria teoriaLocal = new Teoria(this.teorias.size()+this.teoriasPrecargadas.size()+ 1, this.situacionAnterior, stateObs.getAvatarLastAction(), situacionActual, 1, 1, 
@@ -224,6 +223,19 @@ public class Agent extends AbstractMultiPlayer {
 		
 		return situacionesConocidas;
 	}
+	
+	// Agrega la situación si no hay una igual registrada
+	public void agregarNuevaSituacion(Situacion situacion) {
+		boolean agregar = true;
+		for (Situacion s: this.situacionesConocidas) {
+			if (s.esIgualA(situacion)) {
+				agregar = false;
+				break;
+			}
+		}
+		if (agregar)
+			this.situacionesConocidas.add(situacion);
+	}
 
 	//Realiza un movimiento random.
 	private ontology.Types.ACTIONS RealizarMovimientoRandom(StateObservationMulti stateObs){
@@ -302,6 +314,18 @@ public class Agent extends AbstractMultiPlayer {
 			iSit++;
 		} 
 		return casillerosSituacion;
+	}
+	
+	private Situacion obtenerSituacionActual() {
+		Situacion situacionActual = new Situacion(this.situacionesConocidas.size()+1,this.obtenerCasillerosSitActual());
+		for (Situacion s: this.situacionesConocidas) {
+			if (s.esIgualA(situacionActual)) {
+				return s;
+			}
+		}
+		
+		this.situacionesConocidas.add(situacionActual);
+		return situacionActual;
 	}
 	
 	private Graph obtenerGrafoTeoriasYSituaciones() {

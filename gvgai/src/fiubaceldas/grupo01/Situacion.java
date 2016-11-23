@@ -43,7 +43,7 @@ public class Situacion {
 		Simbolo[][] casillerosOtraSituacion = otraSituacion.getCasilleros();
 		for (int i = 0; i < 7; i++)
 			for (int j = 0; j < 7; j++)
-				if (!casilleros[i][j].esIgualA(casillerosOtraSituacion[i][j]))
+				if (!(casilleros[i][j].esIgualA(casillerosOtraSituacion[i][j])))
 					return false;
 		return true;
 	}
@@ -52,7 +52,7 @@ public class Situacion {
 		Simbolo[][] casillerosOtraSituacion = otraSituacion.getCasilleros();
 		for (int i = 0; i < 7; i++)
 			for (int j = 0; j < 7; j++)
-				if (!casilleros[i][j].incluyeA(casillerosOtraSituacion[i][j]))
+				if (!(casilleros[i][j].incluyeA(casillerosOtraSituacion[i][j])))
 					return false;
 		return true;
 	}
