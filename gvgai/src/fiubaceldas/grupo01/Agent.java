@@ -296,22 +296,22 @@ public class Agent extends AbstractMultiPlayer {
 	private char[][] obtenerCasillerosSitActual() {
 		char[][] casillerosNivel = medioManager.getLevel();
 		char[][] casillerosSituacion = new char[7][7];
-		int posXPersonaje = medioManager.getPosicionPersonajeX();
-		int posYPersonaje = medioManager.getPosicionPersonajeY();
+		int colPersonaje = medioManager.getPosicionPersonajeX();
+		int filaPersonaje = medioManager.getPosicionPersonajeY();
 		int anchoMapa = medioManager.getLevelWidth();
 		int altoMapa = medioManager.getLevelHeight();
-		int iSit = 0;
-		for (int i = posXPersonaje - 3; i <= posXPersonaje + 3; i++) {
-			int jSit = 0;
-			for (int j = posYPersonaje - 3; j <= posYPersonaje + 3; j++){
-				if (i >= 0 && i < anchoMapa && j >= 0 && j < altoMapa) {
-					casillerosSituacion[iSit][jSit] = casillerosNivel[i][j];
+		int filaSit = 0;
+		for (int fila = filaPersonaje - 3; fila <= filaPersonaje + 3; fila++) {
+			int colSit = 0;
+			for (int col = colPersonaje - 3; col <= colPersonaje + 3; col++){
+				if (fila >= 0 && fila < altoMapa && col >= 0 && col < anchoMapa) {
+					casillerosSituacion[filaSit][colSit] = casillerosNivel[fila][col];
 				} else {
-					casillerosSituacion[iSit][jSit] = '?';
+					casillerosSituacion[filaSit][colSit] = '?';
 				}
-				jSit++;
+				colSit++;
 			}
-			iSit++;
+			filaSit++;
 		} 
 		return casillerosSituacion;
 	}
