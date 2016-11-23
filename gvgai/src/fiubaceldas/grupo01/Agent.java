@@ -4,13 +4,16 @@ import java.awt.List;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.LineNumberInputStream;
 import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Random;
+import java.util.Vector;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -71,11 +74,73 @@ public class Agent extends AbstractMultiPlayer {
 	
 	
 	private double calcularUtilidadTeoria(Situacion condicionInicial, Situacion efectosPredichos) {
-		int cantidadDePuntitosDeLlegada = efectosPredichos.obtenerCantidadDeElementos("0");
-		int cantidadDeCajas = efectosPredichos.obtenerCantidadDeElementos("1");
-		int cantidadTotal = cantidadDePuntitosDeLlegada + cantidadDeCajas;
+		int cantidadDePuntitosDeLlegadaInicial = condicionInicial.obtenerCantidadDeElementos("0");
+		int cantidadDeCajasInicial = condicionInicial.obtenerCantidadDeElementos("1");
+		int cantidadTotalInicial = cantidadDePuntitosDeLlegadaInicial + cantidadDeCajasInicial;
 		
-		return (1 - (1.0/cantidadTotal));
+		int cantidadDePuntitosDeLlegadaFinal = efectosPredichos.obtenerCantidadDeElementos("0");
+		int cantidadDeCajasFinal = efectosPredichos.obtenerCantidadDeElementos("1");
+		int cantidadTotalFinal = cantidadDePuntitosDeLlegadaFinal + cantidadDeCajasFinal;
+		
+		if (condicionInicial.esIgualA(efectosPredichos)){
+			return (0.05);
+		}
+		
+		if (cantidadTotalInicial != 0 && cantidadTotalFinal != 0) {
+			if (cantidadTotalInicial == cantidadTotalFinal) {
+				Vector2d agente = null;
+				ArrayList<Vector2d> listaDeCajas = new ArrayList<Vector2d>();
+				ArrayList<Vector2d> listaDePuntos = new ArrayList<Vector2d>();
+				
+				Simbolo[][] simbolos = efectosPredichos.getCasilleros();
+				
+				for (int i = 0; i < 7; i++){
+					for (int j = 0; j < 7; j++){
+						if (simbolos[i][j].getSimbolo().equals("A")){
+							agente = new Vector2d(j,i);
+						}
+						
+						if (simbolos[i][j].getSimbolo().equals("1")){
+							Vector2d caja = new Vector2d(j,i);
+							listaDeCajas.add(caja);
+						}
+						
+						if (simbolos[i][j].getSimbolo().equals("0")){
+							Vector2d punto = new Vector2d(j,i);
+							listaDePuntos.add(punto);
+						}
+					}
+				}
+				
+				double menorDistanciaCajas = 9999;
+				
+				for (Vector2d caja : listaDeCajas) {
+					double distancia = agente.dist(caja);
+					
+					if (distancia < menorDistanciaCajas){
+						menorDistanciaCajas = distancia;
+					}
+				}
+				
+				double menorDistanciaPuntos = 9999;
+				
+				for (Vector2d caja : listaDeCajas) {
+					double distancia = agente.dist(caja);
+					
+					if (distancia < menorDistanciaPuntos){
+						menorDistanciaPuntos = distancia;
+					}
+				}
+				
+				return Math.abs(1 - (1.0/(cantidadTotalFinal * (1 / menorDistanciaCajas) * (1 / menorDistanciaPuntos))));
+			}
+		}
+		
+		if (cantidadTotalFinal != 0){
+			return (1 - (1.0/cantidadTotalFinal));
+		}
+		
+		return (0.1);
 	}
 	
 	private void evaluarTeoria(Teoria teoriaLocal) {
@@ -111,7 +176,7 @@ public class Agent extends AbstractMultiPlayer {
 					return plan.ejecutarSiguienteAccion();
 				} else {
 					if (plan.getUtilidadObjetivo() == 1) {
-						//TODO: GANÓ
+						//TODO: GANÃ“
 						return null;
 						
 					//Se puede haber llegado al obj del plan pero no ser el obj del juego	
@@ -120,15 +185,15 @@ public class Agent extends AbstractMultiPlayer {
 						return this.RealizarMovimientoRandom(stateObs);
 					}
 				}
-			//Si se estaba ejecutando un plan para llegar a un obj pero falla la última predicción	
+			//Si se estaba ejecutando un plan para llegar a un obj pero falla la Ãºltima predicciÃ³n	
 			} else {
 				Situacion objetivoActual = plan.obtenerSituacionObjetivo();
 				plan.reiniciar();
 				
-				//Se calcula un nuevo camino a ver si se puede llegar al obj desde donde está ahora
-				armarNuevoPlan(objetivoActual, grafoTeoriasYSituaciones);
+				//Se calcula un nuevo camino a ver si se puede llegar al obj desde donde estÃ¡ ahora
+				armarNuevoPlan(situacionActual, objetivoActual, grafoTeoriasYSituaciones);
 				
-				//Si se encontró un nuevo camino lo ejecuta
+				//Si se encontrÃ³ un nuevo camino lo ejecuta
 				if (plan.enEjecucion())
 					return plan.ejecutarSiguienteAccion();
 				else
@@ -137,12 +202,12 @@ public class Agent extends AbstractMultiPlayer {
 		} else {
 			Teoria teoriaNuevoObjetivo = obtenerTeoriaConMayorUtilidad();
 			if (teoriaNuevoObjetivo == null) {
-				// Esto va a pasar al principio (todavía no hay teorías)
+				// Esto va a pasar al principio (todavÃ­a no hay teorÃ­as)
 				return this.RealizarMovimientoRandom(stateObs); 
 			}
 			
 			Situacion nuevoObjetivo = teoriaNuevoObjetivo.getSitEfectosPredichos();
-			armarNuevoPlan(nuevoObjetivo, grafoTeoriasYSituaciones);
+			armarNuevoPlan(situacionActual, nuevoObjetivo, grafoTeoriasYSituaciones);
 			
 			if (plan.enEjecucion())
 				return plan.ejecutarSiguienteAccion();
@@ -151,9 +216,80 @@ public class Agent extends AbstractMultiPlayer {
 		}
 	}
 	
-	private void armarNuevoPlan(Situacion situacionObjetivo, Graph grafoTeoriasYSituaciones) {
-		//TODO (acá hay que usar el grafo)
-		this.obtenerTeoriaConMayorUtilidad();
+	private void armarNuevoPlan(Situacion situacionActual, Situacion situacionObjetivo, Graph grafoTeoriasYSituaciones) {
+		/*
+		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(grafoTeoriasYSituaciones);
+		Vertex nodoOrigen = grafoTeoriasYSituaciones.getNode(situacionActual.getId());
+		Vertex nodoDestino = grafoTeoriasYSituaciones.getNode(situacionObjetivo.getId());
+		dijkstra.execute(nodoOrigen);
+		
+		LinkedList<Vertex> caminoNodos = dijkstra.getPath(nodoDestino);
+						
+		if (caminoNodos != null)
+			if (caminoNodos.size() >= 2) {
+				
+				ArrayList<Situacion> caminoSituaciones = new ArrayList<Situacion>();
+				for (Vertex nodoSituacion: caminoNodos){
+					if (nodoSituacion != null){
+						for (Situacion situacion: this.situacionesConocidas) {
+							
+							if (situacion != null){
+								int idNodo = Integer.getInteger(nodoSituacion.getId());
+								
+								if (idNodo == situacion.getId()) {
+									caminoSituaciones.add(situacion);
+									break;
+								}
+							}
+						}
+					}
+				}
+				
+				ArrayList<Teoria> caminoTeoriasAcumplir = this.obtenerCaminoTeoriasACumplir(caminoSituaciones);
+				
+				ArrayList<ACTIONS> accionesARealizar = new ArrayList<ACTIONS>();
+				for (Teoria teoria: caminoTeoriasAcumplir)
+					accionesARealizar.add(teoria.getAccionComoAction());
+				
+				Teoria ultimaTeoriaACumplir = caminoTeoriasAcumplir.get(caminoTeoriasAcumplir.size() - 1);
+				double utilidadObjetivo = ultimaTeoriaACumplir.getU();
+				
+				this.plan.setSituacionesPlan(caminoSituaciones);
+				this.plan.setAccionesPlan(accionesARealizar);
+				this.plan.setUtilidadObjetivo(utilidadObjetivo);			
+				
+			}
+		 	*/
+	}
+	
+	private ArrayList<Teoria> obtenerCaminoTeoriasACumplir(ArrayList<Situacion> caminoSituaciones) {
+		ArrayList<Teoria> caminoTeorias = new ArrayList<Teoria>();
+		for (int nSitOrigen = 0; nSitOrigen < caminoSituaciones.size() - 1; nSitOrigen++) {
+			int idSitOrigen = caminoSituaciones.get(nSitOrigen).getId();
+			int idSitDestino = caminoSituaciones.get(nSitOrigen + 1).getId();
+			
+			boolean encontroTeoria = false;
+			for (Teoria teoria: this.teorias) {
+				if (teoria.getIdSitCondicionInicial() == idSitOrigen
+						&& teoria.getIdSitEfectosPredichos() == idSitDestino) {
+					caminoTeorias.add(teoria);
+					encontroTeoria = true;
+					break;
+				}
+			}
+			
+			if (!encontroTeoria) {
+				for (Teoria teoria: this.teoriasPrecargadas) {
+					if (teoria.getIdSitCondicionInicial() == idSitOrigen
+							&& teoria.getIdSitEfectosPredichos() == idSitDestino) {
+						caminoTeorias.add(teoria);
+						break;
+					}
+				}
+			}
+		}
+		return caminoTeorias;
+		
 	}
 	
 	private Teoria obtenerTeoriaConMayorUtilidad() {
@@ -224,7 +360,7 @@ public class Agent extends AbstractMultiPlayer {
 		return situacionesConocidas;
 	}
 	
-	// Agrega la situación si no hay una igual registrada
+	// Agrega la situaciÃ³n si no hay una igual registrada
 	public void agregarNuevaSituacion(Situacion situacion) {
 		boolean agregar = true;
 		for (Situacion s: this.situacionesConocidas) {
