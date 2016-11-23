@@ -349,7 +349,7 @@ public class Agent extends AbstractMultiPlayer {
 					String idSitDestino = Integer.toString(teoria.getIdSitEfectosPredichos());
 					Vertex verticeOrigen = verticesPorId.get(idSitOrigen);
 					Vertex verticeDestino = verticesPorId.get(idSitDestino);
-					int peso = (int)((teoria.getP()/teoria.getK())*100);
+					Double peso = (teoria.getK()-teoria.getP())/teoria.getK();
 					Edge aristaTeoria = new Edge(idTeoria, verticeOrigen, verticeDestino, peso);
 					aristasTeorias.add( aristaTeoria);
 				}
