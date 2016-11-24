@@ -16,7 +16,7 @@ public class Plan {
 	
 	public ACTIONS ejecutarSiguienteAccion() {
 		ACTIONS accionAEjecutar;
-		if (nroUltimaAccionEjecutada < accionesPlan.size() - 1  && nroUltimaAccionEjecutada >= 0) {
+		if (nroUltimaAccionEjecutada < accionesPlan.size() - 1) {
 			accionAEjecutar = accionesPlan.get(nroUltimaAccionEjecutada + 1);
 			nroUltimaAccionEjecutada ++;
 		} else {
@@ -68,5 +68,20 @@ public class Plan {
 		accionesPlan.clear();
 		nroUltimaAccionEjecutada = -1;
 		utilidadObjetivo = -1;
+	}
+
+	public void setSituacionesPlan(ArrayList<Situacion> caminoSituaciones) {
+		this.situacionesPlan = caminoSituaciones;
+		
+	}
+
+	public void setAccionesPlan(ArrayList<ACTIONS> accionesARealizar) {
+		this.accionesPlan = accionesARealizar;
+		
+	}
+
+	public void setUtilidadObjetivo(double utilidadObjetivo) {
+		this.utilidadObjetivo = utilidadObjetivo;
+		
 	}
 }

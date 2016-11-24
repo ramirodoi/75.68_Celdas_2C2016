@@ -19,6 +19,12 @@ public class Graph {
                 return edges;
         }
 
-
+        public Vertex getNode(int idNode) {
+        	String idString = Integer.toString(idNode);
+        	for (Vertex vertex: this.vertexes)
+        		if (vertex.getId().equals(idString))
+        			return vertex;
+        	return null;
+        }
 
 }

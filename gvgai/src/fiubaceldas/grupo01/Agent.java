@@ -163,6 +163,22 @@ public class Agent extends AbstractMultiPlayer {
 				}
 			}
 			
+			if (! encontroTeoria) {
+				for (Teoria teoria : this.teoriasPrecargadas) {
+					if (teoria != null) {
+						if (teoria.getSitCondicionInicial().incluyeA(teoriaLocal.getSitCondicionInicial())){
+							encontroTeoria = true;
+							teoria.setK(teoria.getK() + 1);
+							
+							if (teoria.getSitEfectosPredichos().incluyeA(teoriaLocal.getSitEfectosPredichos())){
+								teoria.setP(teoria.getP() + 1);
+							}
+							
+							break;
+						}
+					}
+				}
+			}
 			if (!encontroTeoria){
 				this.teorias.add(teoriaLocal);
 			}
@@ -218,7 +234,7 @@ public class Agent extends AbstractMultiPlayer {
 	}
 	
 	private void armarNuevoPlan(Situacion situacionActual, Situacion situacionObjetivo, Graph grafoTeoriasYSituaciones) {
-		/*
+		
 		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(grafoTeoriasYSituaciones);
 		Vertex nodoOrigen = grafoTeoriasYSituaciones.getNode(situacionActual.getId());
 		Vertex nodoDestino = grafoTeoriasYSituaciones.getNode(situacionObjetivo.getId());
@@ -231,22 +247,22 @@ public class Agent extends AbstractMultiPlayer {
 				
 				ArrayList<Situacion> caminoSituaciones = new ArrayList<Situacion>();
 				for (Vertex nodoSituacion: caminoNodos){
-					if (nodoSituacion != null){
-						for (Situacion situacion: this.situacionesConocidas) {
+					for (Situacion situacion: this.situacionesConocidas) {
 							
-							if (situacion != null){
-								int idNodo = Integer.getInteger(nodoSituacion.getId());
+						if (situacion != null){
+							int idNodo = Integer.parseInt(nodoSituacion.getId());
 								
-								if (idNodo == situacion.getId()) {
-									caminoSituaciones.add(situacion);
-									break;
-								}
+							if (idNodo == situacion.getId()) {
+								caminoSituaciones.add(situacion);
+								break;
 							}
 						}
 					}
 				}
 				
 				ArrayList<Teoria> caminoTeoriasAcumplir = this.obtenerCaminoTeoriasACumplir(caminoSituaciones);
+				
+				caminoSituaciones.remove(0); //quitamos la primera situacion del plan porque es la actual
 				
 				ArrayList<ACTIONS> accionesARealizar = new ArrayList<ACTIONS>();
 				for (Teoria teoria: caminoTeoriasAcumplir)
@@ -260,7 +276,7 @@ public class Agent extends AbstractMultiPlayer {
 				this.plan.setUtilidadObjetivo(utilidadObjetivo);			
 				
 			}
-		 	*/
+		 	
 	}
 	
 	private ArrayList<Teoria> obtenerCaminoTeoriasACumplir(ArrayList<Situacion> caminoSituaciones) {
