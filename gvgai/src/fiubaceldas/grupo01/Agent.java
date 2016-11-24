@@ -48,6 +48,7 @@ public class Agent extends AbstractMultiPlayer {
 	
 	@Override
 	public ACTIONS act(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer){
+		
 		this.medioManager =  new Perception(stateObs);
 		this.ObtenerTodasLasTeorias();
 		this.situacionesConocidas = this.obtenerSituacionesConocidas();
@@ -310,50 +311,54 @@ public class Agent extends AbstractMultiPlayer {
 		ArrayList<Situacion> situacionesConocidas = new ArrayList<Situacion>();
 		for (Teoria teoria: teorias) {
 			if (teoria != null) {
-				Situacion condicionInicial = teoria.getSitCondicionInicial();
-				Situacion efectosPredichos = teoria.getSitEfectosPredichos();
-				
+								
 				boolean agregarCI = true;
 				boolean agregarEP = true;
 				
 				for (Situacion situacion: situacionesConocidas) {
 					
-					if (situacion.getId() == condicionInicial.getId())
+					if (situacion.getId() == teoria.getIdSitCondicionInicial())
 						agregarCI = false;
 					
-					if (situacion.getId() == efectosPredichos.getId())
+					if (situacion.getId() == teoria.getIdSitEfectosPredichos())
 						agregarEP = false;
 				}
 				
-				if (agregarCI)
+				if (agregarCI) {
+					Situacion condicionInicial = teoria.getSitCondicionInicial();
 					situacionesConocidas.add(condicionInicial);
+				}
 				
-				if (agregarEP)
+				if (agregarEP) {
+					Situacion efectosPredichos = teoria.getSitEfectosPredichos();
 					situacionesConocidas.add(efectosPredichos);
+				}
 			}
 		}
 		for (Teoria teoriaPrecargada: this.teoriasPrecargadas) {
 			if (teoriaPrecargada != null) {
-				Situacion condicionInicial = teoriaPrecargada.getSitCondicionInicial();
-				Situacion efectosPredichos = teoriaPrecargada.getSitEfectosPredichos();
-				
+								
 				boolean agregarCI = true;
 				boolean agregarEP = true;
 				
 				for (Situacion situacion: situacionesConocidas) {
 					
-					if (situacion.getId() == condicionInicial.getId())
+					if (situacion.getId() == teoriaPrecargada.getIdSitCondicionInicial())
 						agregarCI = false;
 					
-					if (situacion.getId() == efectosPredichos.getId())
+					if (situacion.getId() == teoriaPrecargada.getIdSitEfectosPredichos())
 						agregarEP = false;
 				}
 				
-				if (agregarCI)
+				if (agregarCI) {
+					Situacion condicionInicial = teoriaPrecargada.getSitCondicionInicial();
 					situacionesConocidas.add(condicionInicial);
+				}
 				
-				if (agregarEP)
+				if (agregarEP) {
+					Situacion efectosPredichos = teoriaPrecargada.getSitEfectosPredichos();
 					situacionesConocidas.add(efectosPredichos);
+				}
 			}
 		}
 		
