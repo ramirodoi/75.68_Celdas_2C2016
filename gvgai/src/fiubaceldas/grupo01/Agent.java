@@ -150,7 +150,8 @@ public class Agent extends AbstractMultiPlayer {
 			
 			for (Teoria teoria : this.teorias) {
 				if (teoria != null) {
-					if (teoria.getSitCondicionInicial().incluyeA(teoriaLocal.getSitCondicionInicial())){
+					if (teoria.getSitCondicionInicial().incluyeA(teoriaLocal.getSitCondicionInicial())
+							&& teoria.getAccionComoAction() == teoriaLocal.getAccionComoAction()){
 						encontroTeoria = true;
 						teoria.setK(teoria.getK() + 1);
 						
@@ -166,7 +167,8 @@ public class Agent extends AbstractMultiPlayer {
 			if (! encontroTeoria) {
 				for (Teoria teoria : this.teoriasPrecargadas) {
 					if (teoria != null) {
-						if (teoria.getSitCondicionInicial().incluyeA(teoriaLocal.getSitCondicionInicial())){
+						if (teoria.getSitCondicionInicial().incluyeA(teoriaLocal.getSitCondicionInicial())
+								&& teoria.getAccionComoAction() == teoriaLocal.getAccionComoAction()){
 							encontroTeoria = true;
 							teoria.setK(teoria.getK() + 1);
 							
