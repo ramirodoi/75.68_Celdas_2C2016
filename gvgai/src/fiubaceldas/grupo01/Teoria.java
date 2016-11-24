@@ -181,24 +181,10 @@ public class Teoria {
 	}
 	
 	public Situacion getSitCondicionInicial() {
-		String[] filas = condicionInicial.split("\\n");
-		char[][] casillerosSit = new char[7][7];
-		for (int i = 0; i < 7; i++) {
-			for (int j = 0; j < 7; j++) {
-				casillerosSit[j][i] = filas[j].charAt(i);
-			}
-		}
-		return new Situacion(idSitCondicionInicial, casillerosSit);
+		return new Situacion(this.idSitCondicionInicial, this.condicionInicial);
 	}
 	
 	public Situacion getSitEfectosPredichos() {
-		String[] filas = efectosPredichos.split("\\n");
-		char[][] casillerosSit = new char[7][7];
-		for (int i = 0; i < 7; i++) {
-			for (int j = 0; j < 7; j++) {
-				casillerosSit[j][i] = filas[j].charAt(i);
-			}
-		}
-		return new Situacion(idSitEfectosPredichos, casillerosSit);
+		return new Situacion(this.idSitEfectosPredichos, this.efectosPredichos);
 	}	
 }

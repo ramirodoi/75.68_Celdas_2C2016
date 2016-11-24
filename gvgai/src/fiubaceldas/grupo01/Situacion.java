@@ -2,11 +2,17 @@ package fiubaceldas.grupo01;
 
 public class Situacion {
 	private int id;
-	private Simbolo[][] casilleros;
+	private Simbolo[][] casilleros = null;
+	private String situacionComoString;
 	
 	public Situacion(int id, char[][] casilleros) {
 		this.id = id;
 		this.setSimbolosCasilleros(casilleros);
+	}
+	
+	public Situacion(int id, String situacionComoString) {
+		this.id = id;
+		this.situacionComoString = situacionComoString;
 	}
 	
 	public int getId() {
@@ -14,42 +20,61 @@ public class Situacion {
 	}
 	
 	public Simbolo[][] getCasilleros() {
-		return casilleros;
+		if (this.casilleros == null) {
+			this.inicializarCasillerosDesdeString();
+		}
+		return this.casilleros;
+	}
+	
+	public String getSituacionComoString() {
+		return this.situacionComoString;
+	}
+	
+	public void inicializarCasillerosDesdeString() {
+		String[] filas = this.situacionComoString.split("\\n");
+		char[][] casillerosSit = new char[7][7];
+		for (int i = 0; i < 7; i++) {
+			for (int j = 0; j < 7; j++) {
+				casillerosSit[j][i] = filas[j].charAt(i);
+			}
+		}
+		this.setSimbolosCasilleros(casillerosSit);
 	}
 	
 	public void setSimbolosCasilleros(char[][] casilleros) {
 		this.casilleros = new Simbolo[7][7];
+		StringBuilder sb = new StringBuilder("");
 		for(int i = 0; i < 7; i++) {
 			for(int j = 0; j < 7; j++) {
-				if(casilleros[i][j] == 'A')
+				char caracterCasillero = casilleros[i][j];
+				sb.append(caracterCasillero);
+				if(caracterCasillero == 'A')
 					this.casilleros[i][j] = new LetraA();
-				else if(casilleros[i][j] == 'B')
+				else if(caracterCasillero == 'B')
 					this.casilleros[i][j] = new LetraB();
-				else if(casilleros[i][j] == '.')
+				else if(caracterCasillero == '.')
 					this.casilleros[i][j] = new Punto();
-				else if(casilleros[i][j] == 'w')
+				else if(caracterCasillero == 'w')
 					this.casilleros[i][j] = new LetraW();
-				else if(casilleros[i][j] == '0')
+				else if(caracterCasillero == '0')
 					this.casilleros[i][j] = new Cero();
-				else if(casilleros[i][j] == '1')
+				else if(caracterCasillero == '1')
 					this.casilleros[i][j] = new Uno();
-				else if(casilleros[i][j] == '?')
+				else if(caracterCasillero == '?')
 					this.casilleros[i][j] = new SignoDePregunta();
 			}
+			sb.append("\n");
 		}
+		this.situacionComoString = sb.toString();
 	}
 	
 	public boolean esIgualA(Situacion otraSituacion) {
-		Simbolo[][] casillerosOtraSituacion = otraSituacion.getCasilleros();
-		for (int i = 0; i < 7; i++)
-			for (int j = 0; j < 7; j++)
-				if (!(casilleros[i][j].esIgualA(casillerosOtraSituacion[i][j])))
-					return false;
-		return true;
+		return (this.situacionComoString.equals(otraSituacion.getSituacionComoString()));
 	}
 	
 	public boolean incluyeA(Situacion otraSituacion) {
 		Simbolo[][] casillerosOtraSituacion = otraSituacion.getCasilleros();
+		Simbolo[][] casilleros = this.getCasilleros();
 		for (int i = 0; i < 7; i++)
 			for (int j = 0; j < 7; j++)
 				if (!(casilleros[i][j].incluyeA(casillerosOtraSituacion[i][j])))
@@ -58,23 +83,17 @@ public class Situacion {
 	}
 	
 	public String toString() {
-		StringBuilder sb = new StringBuilder("");
-		for(int i = 0; i < 7; i++){
-		        for(int j = 0; j < 7; j++){
-		        	sb.append(casilleros[i][j].getSimbolo().charAt(0));
-		        }
-		        sb.append("\n");
-		}		
-		return sb.toString();
+		return this.situacionComoString;
 	}
 	
 	// Devuelve la cantidad de elemntos en el cuadrado de 7x7.
 	public int obtenerCantidadDeElementos(String elementosAContar){
+		Simbolo[][] casilleros = this.getCasilleros();
 		int cantidadDeElementos = 0;
 		
 		for (int fila = 0; fila < 7; fila++){
 			for (int col = 0; col < 7; col++){
-				if (this.casilleros[fila][col].getSimbolo().equals(elementosAContar)){
+				if (casilleros[fila][col].getSimbolo().equals(elementosAContar)){
 					cantidadDeElementos++;
 				}
 			}
