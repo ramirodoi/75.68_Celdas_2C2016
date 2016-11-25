@@ -6,6 +6,7 @@ package fiubaceldas.grupo01;
 
 import java.util.ArrayList;
 
+import tools.Vector2d;
 import core.game.Observation;
 import core.game.StateObservationMulti;
 
@@ -28,6 +29,7 @@ public class Perception {
 	private int spriteSizeHeightInPixels;
 	private int posPersonajeX;
 	private int posPersonajeY;
+	private ArrayList<Vector2d> posicionesObjetivos;
 
 	
 	public Perception(StateObservationMulti stateObs){
@@ -42,6 +44,7 @@ public class Perception {
 	        this.levelHeight = stateObs.getObservationGrid()[0].length;
 	        this.spriteSizeWidthInPixels =  stateObs.getWorldDimension().width / levelWidth;
 	        this.spriteSizeHeightInPixels =  stateObs.getWorldDimension().height / levelHeight;
+	        this.posicionesObjetivos = new ArrayList<Vector2d>();
 
 	        this.level = new char[levelHeight][levelWidth];
 	        
@@ -54,6 +57,7 @@ public class Perception {
 	        			 if(o.category == 4){
 	        				 if(o.itype == 3){
 	        					 this.level[j][i] = '0';
+	        					 this.posicionesObjetivos.add(new Vector2d(i,j));
 	        				 }else if(o.itype == 0){
 	        					 this.level[j][i] = 'w';	 
 	        				 }
@@ -120,6 +124,10 @@ public class Perception {
 	
 	public int getPosicionPersonajeY() {
 		return posPersonajeY;
+	}
+	
+	public ArrayList<Vector2d> getPosicionesObjetivos() {
+		return this.posicionesObjetivos;
 	}
 	
 	public String toString(){

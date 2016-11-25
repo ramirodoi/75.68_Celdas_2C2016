@@ -60,6 +60,10 @@ public class Situacion {
 					this.casilleros[i][j] = new Cero();
 				else if(caracterCasillero == '1')
 					this.casilleros[i][j] = new Uno();
+				else if(caracterCasillero == 'X')
+					this.casilleros[i][j] = new LetraX();
+				else if(caracterCasillero == 'Y')
+					this.casilleros[i][j] = new LetraY();
 				else if(caracterCasillero == '?')
 					this.casilleros[i][j] = new SignoDePregunta();
 			}

@@ -35,8 +35,10 @@ public class Agent extends AbstractMultiPlayer {
 	private ArrayList<Teoria> teorias;
 	private ArrayList<Teoria> teoriasPrecargadas;
 	private ArrayList<Situacion> situacionesConocidas;
+	private ArrayList<Vector2d> posicionesObjetivos;
 	private Situacion situacionAnterior = null;
 	private Plan plan = new Plan();
+	private ArrayList<Integer> idSitObjetivosAlcanzados = new ArrayList<Integer>();
 	
 	public Agent(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer, int playerID) {
 		this.medioManager =  new Perception(stateObs);
@@ -44,6 +46,7 @@ public class Agent extends AbstractMultiPlayer {
 		this.playerID = playerID;
 		this.teorias = new ArrayList<Teoria>();
 		this.teoriasPrecargadas = new ArrayList<Teoria>();
+		this.posicionesObjetivos = medioManager.getPosicionesObjetivos();
 	}
 	
 	@Override
@@ -200,6 +203,7 @@ public class Agent extends AbstractMultiPlayer {
 						
 					//Se puede haber llegado al obj del plan pero no ser el obj del juego	
 					} else {
+						this.idSitObjetivosAlcanzados.add(plan.obtenerSituacionObjetivo().getId());
 						plan.reiniciar();
 						return this.RealizarMovimientoRandom(stateObs);
 					}
@@ -226,7 +230,8 @@ public class Agent extends AbstractMultiPlayer {
 			}
 			
 			Situacion nuevoObjetivo = teoriaNuevoObjetivo.getSitEfectosPredichos();
-			armarNuevoPlan(situacionActual, nuevoObjetivo, grafoTeoriasYSituaciones);
+			if (!(this.idSitObjetivosAlcanzados.contains(nuevoObjetivo.getId())))
+				armarNuevoPlan(situacionActual, nuevoObjetivo, grafoTeoriasYSituaciones);
 			
 			if (plan.enEjecucion())
 				return plan.ejecutarSiguienteAccion();
@@ -435,8 +440,16 @@ public class Agent extends AbstractMultiPlayer {
 		for (int fila = filaPersonaje - 3; fila <= filaPersonaje + 3; fila++) {
 			int colSit = 0;
 			for (int col = colPersonaje - 3; col <= colPersonaje + 3; col++){
+				Vector2d posicionEnMapa = new Vector2d(col,fila);				
 				if (fila >= 0 && fila < altoMapa && col >= 0 && col < anchoMapa) {
-					casillerosSituacion[filaSit][colSit] = casillerosNivel[fila][col];
+					char simboloVisible = casillerosNivel[fila][col];
+					if (simboloVisible == '1' && this.posicionesObjetivos.contains(posicionEnMapa))
+						casillerosSituacion[filaSit][colSit] = 'X';
+					else
+						if (simboloVisible == 'A' && this.posicionesObjetivos.contains(posicionEnMapa))
+							casillerosSituacion[filaSit][colSit] = 'Y';
+						else
+							casillerosSituacion[filaSit][colSit] = simboloVisible;
 				} else {
 					casillerosSituacion[filaSit][colSit] = '?';
 				}
