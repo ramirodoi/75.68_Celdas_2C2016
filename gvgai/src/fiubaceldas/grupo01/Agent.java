@@ -53,6 +53,9 @@ public class Agent extends AbstractMultiPlayer {
 	public ACTIONS act(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer){
 		
 		this.medioManager =  new Perception(stateObs);
+		if (this.medioManager.getPosicionPersonajeX() == -1)
+			return this.RealizarMovimientoRandom(stateObs);
+		
 		this.ObtenerTodasLasTeorias();
 		this.situacionesConocidas = this.obtenerSituacionesConocidas();
 		
@@ -76,7 +79,353 @@ public class Agent extends AbstractMultiPlayer {
 		return siguienteAccion;
 	}
 	
+	private double calcularUtilidadTeoria(Situacion condicionInicial, Situacion efectosPredichos) { //
+		
+		HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI = condicionInicial.obtenerPosicionesCadaTipoDeElemento();
+		HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP = efectosPredichos.obtenerPosicionesCadaTipoDeElemento();
+		
+		int cantidadCajasSueltasCI = 0;
+		int cantidadCajasEnObjetivosCI = 0;
+		
+		if (posicionesCadaTipoDeElementoCI.containsKey("1"))
+			cantidadCajasSueltasCI = posicionesCadaTipoDeElementoCI.get("1").size();
+		
+		if (posicionesCadaTipoDeElementoCI.containsKey("X"))
+			cantidadCajasEnObjetivosCI = posicionesCadaTipoDeElementoCI.get("X").size();
+				
+		int cantidadCajasCI = cantidadCajasSueltasCI + cantidadCajasEnObjetivosCI;
+		
+		
+		int cantidadCajasSueltasEP = 0;
+		int cantidadCajasEnObjetivosEP = 0;
+		
+		if (posicionesCadaTipoDeElementoEP.containsKey("1"))
+			cantidadCajasSueltasEP = posicionesCadaTipoDeElementoEP.get("1").size();
+		
+		if (posicionesCadaTipoDeElementoEP.containsKey("X"))
+			cantidadCajasEnObjetivosEP = posicionesCadaTipoDeElementoEP.get("X").size();
+				
+		int cantidadCajasEP = cantidadCajasSueltasEP + cantidadCajasEnObjetivosEP;
+		
+		
+		Vector2d posicionPersonajeCI = null;
+		if (posicionesCadaTipoDeElementoCI.containsKey("A"))
+			posicionPersonajeCI = posicionesCadaTipoDeElementoCI.get("A").get(0);
+		if (posicionesCadaTipoDeElementoCI.containsKey("Y"))
+			posicionPersonajeCI = posicionesCadaTipoDeElementoCI.get("Y").get(0);
+		
+		Vector2d posicionPersonajeEP = null;
+		if (posicionesCadaTipoDeElementoEP.containsKey("A"))
+			posicionPersonajeEP = posicionesCadaTipoDeElementoEP.get("A").get(0);
+		if (posicionesCadaTipoDeElementoEP.containsKey("Y"))
+			posicionPersonajeEP = posicionesCadaTipoDeElementoEP.get("Y").get(0);
+		
+		boolean habiaCajas = (cantidadCajasCI > 0);
+		boolean hayCajas = (cantidadCajasEP > 0);
+		boolean personajeSeMovio = (!(posicionPersonajeCI.equals(posicionPersonajeEP)));
+		
+		if (!hayCajas) {
+			if (habiaCajas) {
+				return 0.01;
+			} else {
+				if (!personajeSeMovio)
+					return 0.0625;
+				else
+					return 0.125;
+			}
+		} else {
+			return this.calcularUtilidadSiHayCajas(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
+					cantidadCajasSueltasCI, cantidadCajasSueltasEP, cantidadCajasEnObjetivosCI, cantidadCajasEnObjetivosEP,
+					posicionPersonajeCI, posicionPersonajeEP);
+		}
+	}
 	
+	private double calcularUtilidadSiHayCajas(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
+								HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
+								int cantidadCajasSueltasCI, int cantidadCajasSueltasEP,
+								int cantidadCajasEnObjetivosCI, int cantidadCajasEnObjetivosEP,
+								Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP) { //
+		
+		int cantidadPersEnObjetivosEP = 0;
+		int cantidadObtetivosLibresEP = 0;
+		
+		if (posicionesCadaTipoDeElementoEP.containsKey("Y"))
+			cantidadPersEnObjetivosEP = posicionesCadaTipoDeElementoEP.get("Y").size();
+		
+		if (posicionesCadaTipoDeElementoEP.containsKey("0"))
+			cantidadObtetivosLibresEP = posicionesCadaTipoDeElementoEP.get("0").size();
+		
+		int cantidadObjetivosEP = cantidadObtetivosLibresEP + cantidadCajasEnObjetivosEP + cantidadPersEnObjetivosEP;
+		boolean hayObjetivos = (cantidadObjetivosEP > 0);
+		
+		if (!hayObjetivos)
+			return calcularUtilidadSinObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
+											cantidadCajasEnObjetivosCI, posicionPersonajeCI, posicionPersonajeEP);
+		else
+			return calcularUtilidadConObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
+					cantidadCajasSueltasEP, cantidadCajasEnObjetivosCI, cantidadCajasEnObjetivosEP, 
+					posicionPersonajeCI, posicionPersonajeEP);
+	}
+
+
+	private double calcularUtilidadSinObjetivos(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI, 
+			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP, int cantidadCajasEnObjetivosCI,
+			Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP) { //
+		
+		int cantidadPersEnObjetivosCI = 0;
+		int cantidadObtetivosLibresCI = 0;
+		
+		if (posicionesCadaTipoDeElementoCI.containsKey("Y"))
+			cantidadPersEnObjetivosCI = posicionesCadaTipoDeElementoCI.get("Y").size();
+		
+		if (posicionesCadaTipoDeElementoCI.containsKey("0"))
+			cantidadObtetivosLibresCI = posicionesCadaTipoDeElementoCI.get("0").size();
+		
+		int cantidadObjetivosCI = cantidadObtetivosLibresCI + cantidadCajasEnObjetivosCI + cantidadPersEnObjetivosCI;
+		boolean habiaObjetivos = (cantidadObjetivosCI > 0);
+		
+		if (habiaObjetivos)
+			return 0.1875;
+		else
+			return calcularUtilidadSinObjetivosCINiEP(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
+					posicionPersonajeCI, posicionPersonajeEP);
+	}
+	
+	private double calcularUtilidadSinObjetivosCINiEP(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
+			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
+			Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP) { //
+		
+		
+		ArrayList<Vector2d> posicionesCajasSueltasCI = null;
+		if (posicionesCadaTipoDeElementoCI.containsKey("1"))
+			posicionesCajasSueltasCI = posicionesCadaTipoDeElementoCI.get("1");
+		
+		ArrayList<Vector2d> posicionesCajasSueltasEP = posicionesCadaTipoDeElementoEP.get("1");
+		
+		boolean seMovioAlgunaCaja = false;
+		if (posicionesCajasSueltasCI == null) {
+			seMovioAlgunaCaja = true;
+		} else {
+			if (posicionesCajasSueltasCI.size() != posicionesCajasSueltasEP.size()) {
+				seMovioAlgunaCaja = true;
+			} else {
+				for (Vector2d posicionCajaCI: posicionesCajasSueltasCI) {
+					if (!(posicionesCajasSueltasEP.contains(posicionCajaCI))) {
+						seMovioAlgunaCaja = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		if (!seMovioAlgunaCaja)
+			return calcularUtilidadSiNoSeMovieronCajas(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
+					posicionesCajasSueltasCI, posicionesCajasSueltasEP,
+					posicionPersonajeCI, posicionPersonajeEP);
+		else
+			return 0.4375;
+	}
+
+	private double calcularUtilidadSiNoSeMovieronCajas(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
+			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
+			ArrayList<Vector2d> posicionesCajasSueltasCI, ArrayList<Vector2d> posicionesCajasSueltasEP,
+			Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP) { //
+		
+		double distMinimaACajasCI = 100;
+		for (Vector2d posicionCajaCI: posicionesCajasSueltasCI) {
+			double distanciaACaja = posicionPersonajeCI.dist(posicionCajaCI);
+			if (distanciaACaja < distMinimaACajasCI)
+				distMinimaACajasCI = distanciaACaja;
+		}
+		
+		double distMinimaACajasEP = 100;
+		for (Vector2d posicionCajaEP: posicionesCajasSueltasEP) {
+			double distanciaACaja = posicionPersonajeEP.dist(posicionCajaEP);
+			if (distanciaACaja < distMinimaACajasEP)
+				distMinimaACajasEP = distanciaACaja;
+		}
+		
+		boolean seAlejoDeLasCajas = (distMinimaACajasCI < distMinimaACajasEP);
+		if (seAlejoDeLasCajas) {
+			return 0.25;
+		} else {
+			boolean seMovioElPersonaje = (!(posicionPersonajeCI.equals(posicionPersonajeEP)));
+			if (!seMovioElPersonaje)
+				return 0.3125;
+			else
+				return (0.375 + 0.0625 / distMinimaACajasEP);
+		}
+	}
+
+	private double calcularUtilidadConObjetivos(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
+			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
+			int cantidadCajasSueltasEP, int cantidadCajasEnObjetivosCI,
+			int cantidadCajasEnObjetivosEP, Vector2d posicionPersonajeCI,
+			Vector2d posicionPersonajeEP) { //
+
+		
+		ArrayList<Vector2d> posicionesCajasSueltasEP = null;
+		if (posicionesCadaTipoDeElementoEP.containsKey("1"))
+			posicionesCajasSueltasEP = posicionesCadaTipoDeElementoEP.get("1");
+		
+		ArrayList<Vector2d> posicionesObjetivosSinCajasEP = null;
+		if (posicionesCadaTipoDeElementoEP.containsKey("0"))
+			posicionesObjetivosSinCajasEP = posicionesCadaTipoDeElementoEP.get("0");
+		if (posicionesCadaTipoDeElementoEP.containsKey("Y")) {
+			if (posicionesObjetivosSinCajasEP == null)
+				posicionesObjetivosSinCajasEP = posicionesCadaTipoDeElementoEP.get("Y");
+			else
+				posicionesObjetivosSinCajasEP.addAll(posicionesCadaTipoDeElementoEP.get("Y"));
+		}
+		
+		boolean hayCajasEnObjetivos = (cantidadCajasEnObjetivosEP > 0);
+		if (!hayCajasEnObjetivos)
+			return calcularUtilidadSinCajasEnObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
+					cantidadCajasEnObjetivosCI, posicionPersonajeCI, posicionPersonajeEP,
+					posicionesCajasSueltasEP, posicionesObjetivosSinCajasEP);
+		else
+			return calcularUtilidadConCajasEnObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
+					cantidadCajasSueltasEP, cantidadCajasEnObjetivosEP,
+					posicionesCajasSueltasEP, posicionesObjetivosSinCajasEP);
+	}	
+	
+
+	private double calcularUtilidadSinCajasEnObjetivos(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
+			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
+			int cantidadCajasEnObjetivosCI, Vector2d posicionPersonajeCI,
+			Vector2d posicionPersonajeEP,
+			ArrayList<Vector2d> posicionesCajasSueltasEP, ArrayList<Vector2d> posicionesObjetivosSinCajasEP) { //
+		
+		boolean habiaCajasEnObjetivos = (cantidadCajasEnObjetivosCI > 0);
+		if (habiaCajasEnObjetivos)
+			return 0.5;
+		else
+			return calcularUtilidadSinCajasEnObjetivosCINiEP(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
+					posicionPersonajeCI, posicionPersonajeEP,
+					posicionesCajasSueltasEP, posicionesObjetivosSinCajasEP);
+			
+	}
+
+	
+	private double calcularUtilidadSinCajasEnObjetivosCINiEP(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
+			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
+			Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP,
+			ArrayList<Vector2d> posicionesCajasSueltasEP, ArrayList<Vector2d> posicionesObjetivosSinCajasEP) { //
+			
+		boolean aumentoDistanciaCajasObjetivos = false;		
+		
+		double distMinimaCajasObjetivosEP = 100;		
+		for (Vector2d posicionCajaEP: posicionesCajasSueltasEP){
+			for (Vector2d posicionObjetivoEP: posicionesObjetivosSinCajasEP) {
+				double distanciaCajaObjetivo = posicionCajaEP.dist(posicionObjetivoEP);
+				if (distanciaCajaObjetivo < distMinimaCajasObjetivosEP)
+					distMinimaCajasObjetivosEP = distanciaCajaObjetivo;
+			}
+		}
+		
+		
+		ArrayList<Vector2d> posicionesCajasSueltasCI = null;
+		if (posicionesCadaTipoDeElementoCI.containsKey("1"))
+			posicionesCajasSueltasCI = posicionesCadaTipoDeElementoCI.get("1");
+		
+		ArrayList<Vector2d> posicionesObjetivosSinCajasCI = null;
+		if (posicionesCadaTipoDeElementoCI.containsKey("0"))
+			posicionesObjetivosSinCajasCI = posicionesCadaTipoDeElementoCI.get("0");
+		if (posicionesCadaTipoDeElementoCI.containsKey("Y")) {
+			if (posicionesObjetivosSinCajasCI == null)
+				posicionesObjetivosSinCajasCI = posicionesCadaTipoDeElementoCI.get("Y");
+			else
+				posicionesObjetivosSinCajasCI.addAll(posicionesCadaTipoDeElementoCI.get("Y"));
+		}
+		
+		
+		double distMinimaCajasObjetivosCI = 100;
+		if (!(posicionesCajasSueltasCI == null || posicionesObjetivosSinCajasCI == null)) {
+			
+			for (Vector2d posicionCajaCI: posicionesCajasSueltasCI){
+				for (Vector2d posicionObjetivoCI: posicionesObjetivosSinCajasCI) {
+					double distanciaCajaObjetivo = posicionCajaCI.dist(posicionObjetivoCI);
+					if (distanciaCajaObjetivo < distMinimaCajasObjetivosCI)
+						distMinimaCajasObjetivosCI = distanciaCajaObjetivo;
+				}
+			}			
+			
+			aumentoDistanciaCajasObjetivos = (distMinimaCajasObjetivosEP > distMinimaCajasObjetivosCI);
+		}
+		
+		if (aumentoDistanciaCajasObjetivos) {
+			return 0.5625;
+		} else {
+			boolean seMovioPersonaje = (!(posicionPersonajeCI.equals(posicionPersonajeEP)));
+			if (!seMovioPersonaje)
+				return 0.625;
+			else
+				return 0.6825 + 0.0625 / distMinimaCajasObjetivosEP;
+		}
+		
+		
+	}
+	
+	private double calcularUtilidadConCajasEnObjetivos(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
+			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
+			int cantidadCajasSueltasEP, int cantidadCajasEnObjetivosEP,
+			ArrayList<Vector2d> posicionesCajasSueltasEP, ArrayList<Vector2d> posicionesObjetivosSinCajasEP) { //
+		
+		if (cantidadCajasEnObjetivosEP != 3){
+			if (cantidadCajasEnObjetivosEP != 2)
+				return calcularUtilidadConUnaCajaEnObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP, 
+						posicionesCajasSueltasEP, posicionesObjetivosSinCajasEP, cantidadCajasSueltasEP);
+			else
+				return calcularUtilidadConDosCajasEnObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
+						posicionesCajasSueltasEP, posicionesObjetivosSinCajasEP, cantidadCajasSueltasEP);
+		} else {
+			return 1;
+		}
+	}
+
+	
+	private double calcularUtilidadConUnaCajaEnObjetivos(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
+			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP, ArrayList<Vector2d> posicionesCajasSueltasEP,
+			ArrayList<Vector2d> posicionesObjetivosSinCajasEP, int cantidadCajasSueltasEP) {
+		
+		boolean hayCajasSueltas = (cantidadCajasSueltasEP > 0);
+		if (!hayCajasSueltas)
+			return 0.75;
+		else {
+			double distMinimaCajasObjetivosEP = 100;
+			for (Vector2d posicionCajaEP: posicionesCajasSueltasEP){
+				for (Vector2d posicionObjetivoEP: posicionesObjetivosSinCajasEP) {
+					double distanciaCajaObjetivo = posicionCajaEP.dist(posicionObjetivoEP);
+					if (distanciaCajaObjetivo < distMinimaCajasObjetivosEP)
+						distMinimaCajasObjetivosEP = distanciaCajaObjetivo;
+				}
+			}
+			return 0.8125 + 0.0625 / distMinimaCajasObjetivosEP;
+		}
+	}
+	
+	private double calcularUtilidadConDosCajasEnObjetivos(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
+			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP, ArrayList<Vector2d> posicionesCajasSueltasEP,
+			ArrayList<Vector2d> posicionesObjetivosSinCajasEP, int cantidadCajasSueltasEP) {
+		
+		boolean hayCajasSueltas = (cantidadCajasSueltasEP > 0);
+		if (!hayCajasSueltas)
+			return 0.875;
+		else {
+			double distMinimaCajasObjetivosEP = 100;
+			for (Vector2d posicionCajaEP: posicionesCajasSueltasEP){
+				for (Vector2d posicionObjetivoEP: posicionesObjetivosSinCajasEP) {
+					double distanciaCajaObjetivo = posicionCajaEP.dist(posicionObjetivoEP);
+					if (distanciaCajaObjetivo < distMinimaCajasObjetivosEP)
+						distMinimaCajasObjetivosEP = distanciaCajaObjetivo;
+				}
+			}
+			return 0.9375 + 0.0625 / distMinimaCajasObjetivosEP;
+		}
+	}
+
+
+	/*	
 	private double calcularUtilidadTeoria(Situacion condicionInicial, Situacion efectosPredichos) {
 		int cantidadDePuntitosDeLlegadaInicial = condicionInicial.obtenerCantidadDeElementos("0");
 		int cantidadDeCajasInicial = condicionInicial.obtenerCantidadDeElementos("1");
@@ -146,7 +495,7 @@ public class Agent extends AbstractMultiPlayer {
 		
 		return (0.1);
 	}
-	
+*/	
 	private void evaluarTeoria(Teoria teoriaLocal) {
 		if (teoriaLocal != null) {
 			boolean encontroTeoria = false;

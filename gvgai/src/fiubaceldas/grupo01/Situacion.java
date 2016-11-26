@@ -1,5 +1,10 @@
 package fiubaceldas.grupo01;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import tools.Vector2d;
+
 public class Situacion {
 	private int id;
 	private Simbolo[][] casilleros = null;
@@ -104,5 +109,43 @@ public class Situacion {
 		}
 		
 		return (cantidadDeElementos);
+	}
+	
+	public HashMap<String, Integer> obtenerCantidadesDeTodosLosElementos() {
+		Simbolo[][] casilleros = this.getCasilleros();
+		HashMap<String, Integer> cantidades = new HashMap<String, Integer>();		
+		for (int fila = 0; fila < 7; fila++){
+			for (int col = 0; col < 7; col++){
+				String simbolo = casilleros[fila][col].getSimbolo();
+				if (cantidades.containsKey(simbolo)) {
+					int cantidadActual = cantidades.get(simbolo);
+					cantidades.put(simbolo, cantidadActual + 1);
+				} else {
+					cantidades.put(simbolo, 1);
+				}
+			}
+		}
+		return cantidades;
+	}
+	
+	public HashMap<String, ArrayList<Vector2d>> obtenerPosicionesCadaTipoDeElemento() {
+		Simbolo[][] casilleros = this.getCasilleros();
+		HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElemento = new HashMap<String, ArrayList<Vector2d>>();
+		for (int fila = 0; fila < 7; fila++){
+			for (int col = 0; col < 7; col++){
+				String simbolo = casilleros[fila][col].getSimbolo();
+				Vector2d posicion = new Vector2d(col,fila);
+				ArrayList<Vector2d> posiciones;
+				if (posicionesCadaTipoDeElemento.containsKey(simbolo)) {
+					posiciones = posicionesCadaTipoDeElemento.get(simbolo);
+					posiciones.add(posicion);
+				} else {
+					posiciones = new ArrayList<Vector2d>();
+					posiciones.add(posicion);
+					posicionesCadaTipoDeElemento.put(simbolo, posiciones);
+				}
+			}
+		}
+		return posicionesCadaTipoDeElemento;
 	}
 }

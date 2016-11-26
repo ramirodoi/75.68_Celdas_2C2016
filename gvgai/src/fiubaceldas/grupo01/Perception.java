@@ -27,8 +27,8 @@ public class Perception {
 	private int levelHeight;
 	private int spriteSizeWidthInPixels;
 	private int spriteSizeHeightInPixels;
-	private int posPersonajeX;
-	private int posPersonajeY;
+	private int posPersonajeX = -1;
+	private int posPersonajeY = -1;
 	private ArrayList<Vector2d> posicionesObjetivos;
 
 	
