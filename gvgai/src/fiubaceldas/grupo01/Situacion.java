@@ -91,6 +91,33 @@ public class Situacion {
 		return true;
 	}
 	
+	public Situacion generalizacionCon(Situacion otraSituacion, int idNuevaSituacion) {
+		Simbolo[][] casilleros = this.getCasilleros();
+		Simbolo[][] casillerosOtraSituacion = otraSituacion.getCasilleros();
+		int cantidadSimbolosCoinciden = 0;
+		char[][] casillerosSitGeneral = new char[7][7];
+		for (int fila = 0; fila < 7; fila++){
+			for (int col = 0; col < 7; col++){
+				Simbolo simbolo = casilleros[fila][col];
+				Simbolo simboloOtraSituacion = casillerosOtraSituacion[fila][col];
+				char simboloSitGeneral;
+				if (simbolo.esIgualA(simboloOtraSituacion)) {
+					simboloSitGeneral = simbolo.getSimbolo().charAt(0);
+					if (simboloSitGeneral != '?' && simboloSitGeneral != 'A')
+						cantidadSimbolosCoinciden++;
+				} else {
+					simboloSitGeneral = '?';
+				}
+				casillerosSitGeneral[fila][col] = simboloSitGeneral;
+			}
+		}
+		
+		if (cantidadSimbolosCoinciden == 0)
+			return null;
+		
+		return (new Situacion(idNuevaSituacion, casillerosSitGeneral));
+	}
+	
 	public String toString() {
 		return this.situacionComoString;
 	}

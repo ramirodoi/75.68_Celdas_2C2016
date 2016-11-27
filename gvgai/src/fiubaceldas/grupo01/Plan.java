@@ -39,7 +39,7 @@ public class Plan {
 	
 	public boolean cumpleElPlan(Situacion situacionActual) {
 		if (nroUltimaAccionEjecutada >= 0)
-			return (situacionesPlan.get(nroUltimaAccionEjecutada).esIgualA(situacionActual));
+			return (situacionesPlan.get(nroUltimaAccionEjecutada).incluyeA(situacionActual));
 		return false;
 	}
 	

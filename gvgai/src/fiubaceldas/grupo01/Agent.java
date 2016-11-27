@@ -425,118 +425,58 @@ public class Agent extends AbstractMultiPlayer {
 	}
 
 
-	/*	
-	private double calcularUtilidadTeoria(Situacion condicionInicial, Situacion efectosPredichos) {
-		int cantidadDePuntitosDeLlegadaInicial = condicionInicial.obtenerCantidadDeElementos("0");
-		int cantidadDeCajasInicial = condicionInicial.obtenerCantidadDeElementos("1");
-		int cantidadTotalInicial = cantidadDePuntitosDeLlegadaInicial + cantidadDeCajasInicial;
-		
-		int cantidadDePuntitosDeLlegadaFinal = efectosPredichos.obtenerCantidadDeElementos("0");
-		int cantidadDeCajasFinal = efectosPredichos.obtenerCantidadDeElementos("1");
-		int cantidadTotalFinal = cantidadDePuntitosDeLlegadaFinal + cantidadDeCajasFinal;
-		
-		if (condicionInicial.esIgualA(efectosPredichos)){
-			return (0.05);
-		}
-		
-		if (cantidadTotalInicial != 0 && cantidadTotalFinal != 0) {
-			if (cantidadTotalInicial == cantidadTotalFinal) {
-				Vector2d agente = null;
-				ArrayList<Vector2d> listaDeCajas = new ArrayList<Vector2d>();
-				ArrayList<Vector2d> listaDePuntos = new ArrayList<Vector2d>();
-				
-				Simbolo[][] simbolos = efectosPredichos.getCasilleros();
-				
-				for (int i = 0; i < 7; i++){
-					for (int j = 0; j < 7; j++){
-						if (simbolos[i][j].getSimbolo().equals("A")){
-							agente = new Vector2d(j,i);
-						}
-						
-						if (simbolos[i][j].getSimbolo().equals("1")){
-							Vector2d caja = new Vector2d(j,i);
-							listaDeCajas.add(caja);
-						}
-						
-						if (simbolos[i][j].getSimbolo().equals("0")){
-							Vector2d punto = new Vector2d(j,i);
-							listaDePuntos.add(punto);
-						}
-					}
-				}
-				
-				double menorDistanciaCajas = 9999;
-				
-				for (Vector2d caja : listaDeCajas) {
-					double distancia = agente.dist(caja);
-					
-					if (distancia < menorDistanciaCajas){
-						menorDistanciaCajas = distancia;
-					}
-				}
-				
-				double menorDistanciaPuntos = 9999;
-				
-				for (Vector2d caja : listaDeCajas) {
-					double distancia = agente.dist(caja);
-					
-					if (distancia < menorDistanciaPuntos){
-						menorDistanciaPuntos = distancia;
-					}
-				}
-				
-				return Math.abs(1 - (1.0/(cantidadTotalFinal * (1 / menorDistanciaCajas) * (1 / menorDistanciaPuntos))));
-			}
-		}
-		
-		if (cantidadTotalFinal != 0){
-			return (1 - (1.0/cantidadTotalFinal));
-		}
-		
-		return (0.1);
-	}
-*/	
 	private void evaluarTeoria(Teoria teoriaLocal) {
+		
 		if (teoriaLocal != null) {
-			boolean encontroTeoria = false;
+			boolean encontroTeoria = false;			
+			encontroTeoria = buscarTeoriaYAplicarHeuristica(teoriaLocal, this.teorias);
 			
-			for (Teoria teoria : this.teorias) {
-				if (teoria != null) {
-					if (teoria.getSitCondicionInicial().incluyeA(teoriaLocal.getSitCondicionInicial())
-							&& teoria.getAccionComoAction() == teoriaLocal.getAccionComoAction()){
-						encontroTeoria = true;
-						teoria.setK(teoria.getK() + 1);
-						
-						if (teoria.getSitEfectosPredichos().incluyeA(teoriaLocal.getSitEfectosPredichos())){
-							teoria.setP(teoria.getP() + 1);
-						}
-						
-						break;
-					}
-				}
+			if (!encontroTeoria) {
+				encontroTeoria = buscarTeoriaYAplicarHeuristica(teoriaLocal, this.teoriasPrecargadas);
 			}
 			
-			if (! encontroTeoria) {
-				for (Teoria teoria : this.teoriasPrecargadas) {
-					if (teoria != null) {
-						if (teoria.getSitCondicionInicial().incluyeA(teoriaLocal.getSitCondicionInicial())
-								&& teoria.getAccionComoAction() == teoriaLocal.getAccionComoAction()){
-							encontroTeoria = true;
-							teoria.setK(teoria.getK() + 1);
-							
-							if (teoria.getSitEfectosPredichos().incluyeA(teoriaLocal.getSitEfectosPredichos())){
-								teoria.setP(teoria.getP() + 1);
-							}
-							
-							break;
-						}
-					}
-				}
-			}
 			if (!encontroTeoria){
 				this.teorias.add(teoriaLocal);
 			}
 		}
+	}
+
+	private boolean buscarTeoriaYAplicarHeuristica(Teoria teoriaLocal, ArrayList<Teoria> listaDeTeorias) {
+		
+		boolean encontroTeoria = false;
+		
+		for (Teoria teoria : listaDeTeorias) {
+			if (teoria != null) {
+				
+				Situacion condicionInicialTeoria = teoria.getSitCondicionInicial();
+				ACTIONS accionTeoria = teoria.getAccionComoAction();					
+				Situacion condicionInicialTeoriaLocal = teoriaLocal.getSitCondicionInicial();
+				ACTIONS accionTeoriaLocal = teoriaLocal.getAccionComoAction();
+				
+				if (condicionInicialTeoria.incluyeA(condicionInicialTeoriaLocal)
+						&& accionTeoria == accionTeoriaLocal){
+					encontroTeoria = true;
+					teoria.setK(teoria.getK() + 1);
+					
+					Situacion efectosPredichosTeoria = teoria.getSitEfectosPredichos();
+					Situacion efectosPredichosTeoriaLocal = teoriaLocal.getSitEfectosPredichos();
+					
+					if (teoria.getSitEfectosPredichos().incluyeA(teoriaLocal.getSitEfectosPredichos())){
+						teoria.setP(teoria.getP() + 1);
+					} else {
+						Situacion EPGeneralizados = efectosPredichosTeoria.generalizacionCon(efectosPredichosTeoriaLocal, 
+																						this.situacionesConocidas.size() + 1);
+						if (EPGeneralizados != null) {
+							teoriaLocal.setEfectosPredichos(EPGeneralizados);
+							this.teorias.add(teoriaLocal);
+						}
+					}
+					
+					break;
+				}
+			}
+		}
+		return encontroTeoria;
 	}
 	
 	private ACTIONS calcularAccionYActualizarPlan(StateObservationMulti stateObs, Situacion situacionActual, 
