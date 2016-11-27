@@ -34,6 +34,7 @@ public class Agent extends AbstractMultiPlayer {
 	private int playerID;
 	private ArrayList<Teoria> teorias;
 	private ArrayList<Teoria> teoriasPrecargadas;
+	private ArrayList<Teoria> teoriasConUtilidadNula;
 	private ArrayList<Situacion> situacionesConocidas;
 	private ArrayList<Vector2d> posicionesObjetivos;
 	private Situacion situacionAnterior = null;
@@ -46,7 +47,9 @@ public class Agent extends AbstractMultiPlayer {
 		this.playerID = playerID;
 		this.teorias = new ArrayList<Teoria>();
 		this.teoriasPrecargadas = new ArrayList<Teoria>();
+		this.teoriasConUtilidadNula = new ArrayList<Teoria>();
 		this.posicionesObjetivos = medioManager.getPosicionesObjetivos();
+		this.ObtenerTeoriasPrecargadas();
 	}
 	
 	@Override
@@ -54,9 +57,9 @@ public class Agent extends AbstractMultiPlayer {
 		
 		this.medioManager =  new Perception(stateObs);
 		if (this.medioManager.getPosicionPersonajeX() == -1)
-			return this.RealizarMovimientoRandom(stateObs);
+			return this.RealizarMovimientoRandom(stateObs, null);
 		
-		this.ObtenerTodasLasTeorias();
+		this.ObtenerTeorias();
 		this.situacionesConocidas = this.obtenerSituacionesConocidas();
 		
 		if (this.situacionAnterior != null) {
@@ -437,6 +440,9 @@ public class Agent extends AbstractMultiPlayer {
 			
 			if (!encontroTeoria){
 				this.teorias.add(teoriaLocal);
+				if (teoriaLocal.getU() == 0) {
+					this.teoriasConUtilidadNula.add(teoriaLocal);
+				}
 			}
 		}
 	}
@@ -469,6 +475,9 @@ public class Agent extends AbstractMultiPlayer {
 						if (EPGeneralizados != null) {
 							teoriaLocal.setEfectosPredichos(EPGeneralizados);
 							this.teorias.add(teoriaLocal);
+							if (teoriaLocal.getU() == 0) {
+								this.teoriasConUtilidadNula.add(teoriaLocal);
+							}
 						}
 					}
 					
@@ -494,7 +503,7 @@ public class Agent extends AbstractMultiPlayer {
 					} else {
 						this.idSitObjetivosAlcanzados.add(plan.obtenerSituacionObjetivo().getId());
 						plan.reiniciar();
-						return this.RealizarMovimientoRandom(stateObs);
+						return this.RealizarMovimientoRandom(stateObs, situacionActual);
 					}
 				}
 			//Si se estaba ejecutando un plan para llegar a un obj pero falla la última predicción	
@@ -509,13 +518,13 @@ public class Agent extends AbstractMultiPlayer {
 				if (plan.enEjecucion())
 					return plan.ejecutarSiguienteAccion();
 				else
-					return this.RealizarMovimientoRandom(stateObs);
+					return this.RealizarMovimientoRandom(stateObs, situacionActual);
 			}
 		} else {
 			Teoria teoriaNuevoObjetivo = obtenerTeoriaConMayorUtilidad();
 			if (teoriaNuevoObjetivo == null) {
 				// Esto va a pasar al principio (todavía no hay teorías)
-				return this.RealizarMovimientoRandom(stateObs); 
+				return this.RealizarMovimientoRandom(stateObs, situacionActual); 
 			}
 			
 			Situacion nuevoObjetivo = teoriaNuevoObjetivo.getSitEfectosPredichos();
@@ -525,7 +534,7 @@ public class Agent extends AbstractMultiPlayer {
 			if (plan.enEjecucion())
 				return plan.ejecutarSiguienteAccion();
 			else
-				return this.RealizarMovimientoRandom(stateObs);
+				return this.RealizarMovimientoRandom(stateObs, situacionActual);
 		}
 	}
 	
@@ -663,16 +672,36 @@ public class Agent extends AbstractMultiPlayer {
 	}
 
 	//Realiza un movimiento random.
-	private ontology.Types.ACTIONS RealizarMovimientoRandom(StateObservationMulti stateObs){
-		ArrayList<ACTIONS> a = stateObs.getAvailableActions(this.playerID);
+	private ontology.Types.ACTIONS RealizarMovimientoRandom(StateObservationMulti stateObs, Situacion situacionActual){
+		ArrayList<ACTIONS> accionesPosibles = stateObs.getAvailableActions(this.playerID);
 		
-		return (ACTIONS.values()[new Random().nextInt(a.size())]);
+		while (accionesPosibles.size() > 0) {
+			
+			int nAccionRandom = new Random().nextInt(accionesPosibles.size());
+			ACTIONS accionRandom = ACTIONS.values()[nAccionRandom];
+			
+			if (situacionActual == null)
+				return accionRandom;
+			
+			boolean accionPerdedora = false;
+			for (Teoria teoriaConUtilidadNula: this.teoriasConUtilidadNula) {
+				ACTIONS accionTeoriaUtilidadNula = teoriaConUtilidadNula.getAccionComoAction();
+				if (accionRandom.equals(accionTeoriaUtilidadNula)) {
+					Situacion CITeoriaUtilidadNula = teoriaConUtilidadNula.getSitCondicionInicial();
+					if (CITeoriaUtilidadNula.incluyeA(situacionActual)) {
+						accionPerdedora = true;
+						break;
+					}
+				}
+			}
+			if (accionPerdedora)
+				accionesPosibles.remove(nAccionRandom);
+			else
+				return accionRandom;
+		}
+		return ACTIONS.ACTION_NIL;
 	}
-	
-	private void ObtenerTodasLasTeorias(){
-		this.ObtenerTeorias();
-		this.ObtenerTeoriasPrecargadas();
-	}
+
 	
 	//Obtiene todas las Teorias desde el archivo.
 	private void ObtenerTeorias(){
@@ -692,7 +721,12 @@ public class Agent extends AbstractMultiPlayer {
 		
 		if (teoriasPrecargadas != null && teoriasPrecargadas.size() > 0){
 			this.teoriasPrecargadas.clear();
-			this.teoriasPrecargadas.addAll(teoriasPrecargadas);
+			for (Teoria teoriaPrecargada: teoriasPrecargadas) {
+				this.teoriasPrecargadas.add(teoriaPrecargada);
+				if (teoriaPrecargada.getU() == 0) {
+					this.teoriasConUtilidadNula.add(teoriaPrecargada);
+				}
+			}
 		}
 	}
 	
