@@ -94,6 +94,10 @@ public class Situacion {
 	public Situacion generalizacionCon(Situacion otraSituacion, int idNuevaSituacion) {
 		Simbolo[][] casilleros = this.getCasilleros();
 		Simbolo[][] casillerosOtraSituacion = otraSituacion.getCasilleros();
+		
+		if (casilleros[3][3] != casillerosOtraSituacion[3][3])
+			return null;
+		
 		int cantidadSimbolosCoinciden = 0;
 		char[][] casillerosSitGeneral = new char[7][7];
 		for (int fila = 0; fila < 7; fila++){

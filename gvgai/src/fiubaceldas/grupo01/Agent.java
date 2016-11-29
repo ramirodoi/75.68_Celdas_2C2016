@@ -427,66 +427,125 @@ public class Agent extends AbstractMultiPlayer {
 		}
 	}
 
-
 	private void evaluarTeoria(Teoria teoriaLocal) {
 		
-		if (teoriaLocal != null) {
-			boolean encontroTeoria = false;			
-			encontroTeoria = buscarTeoriaYAplicarHeuristica(teoriaLocal, this.teorias);
+		if (teoriaLocal != null) {					
 			
-			if (!encontroTeoria) {
-				encontroTeoria = buscarTeoriaYAplicarHeuristica(teoriaLocal, this.teoriasPrecargadas);
-			}
+			ArrayList<Teoria> teoriasSimilares = this.buscarTeoriasSimilares(teoriaLocal, this.teorias);
+			ArrayList<Teoria> teoriasSimilaresPrecargadas = this.buscarTeoriasSimilares(teoriaLocal, this.teoriasPrecargadas);
+			ArrayList<Teoria> todasLasTeoriasSimilares = new ArrayList<Teoria>();
+			todasLasTeoriasSimilares.addAll(teoriasSimilares);
+			todasLasTeoriasSimilares.addAll(teoriasSimilaresPrecargadas);
 			
-			if (!encontroTeoria){
+			boolean hayTeoriasSimilares = (todasLasTeoriasSimilares.size() > 0);			
+			if (hayTeoriasSimilares) {
+				Teoria teoriaIgualALocal = this.buscarTeoriaIgual(teoriaLocal, todasLasTeoriasSimilares);
+				if (teoriaIgualALocal != null) {
+					teoriaIgualALocal.setP(teoriaIgualALocal.getP() + 1);
+					for (Teoria teoriaSimilar: todasLasTeoriasSimilares) {
+						teoriaSimilar.setK(teoriaSimilar.getK() + 1);
+					}
+				} else {
+					
+					this.teorias.add(teoriaLocal);	
+					
+					Situacion CITeoriaLocal = teoriaLocal.getSitCondicionInicial();					
+					Situacion EPTeoriaLocal = teoriaLocal.getSitEfectosPredichos();
+					
+					Teoria teoriaSimilar = todasLasTeoriasSimilares.get(0);
+					Situacion EPTeoriaSimilar = teoriaSimilar.getSitEfectosPredichos();
+					
+					Situacion EPTeoriaMutante = EPTeoriaLocal.generalizacionCon(EPTeoriaSimilar, EPTeoriaLocal.getId()+1);
+															
+					for (int i = 1; i < todasLasTeoriasSimilares.size() && EPTeoriaMutante != null; i++) {
+						EPTeoriaSimilar = todasLasTeoriasSimilares.get(i).getSitEfectosPredichos();
+						EPTeoriaMutante = EPTeoriaMutante.generalizacionCon(EPTeoriaSimilar, teoriaLocal.getId()+1);
+					}
+					
+					double KTeoriasSimilares = teoriaSimilar.getK();
+					double nuevoKTeoriasSimilares;
+					
+					if (EPTeoriaMutante != null) {
+					
+						Teoria teoriaMutante = new Teoria(teoriaLocal.getId() + 1, 
+												CITeoriaLocal, teoriaLocal.getAccionComoAction(), EPTeoriaMutante, 
+												KTeoriasSimilares + 2, 1, calcularUtilidadTeoria(CITeoriaLocal, EPTeoriaMutante));
+						
+						Teoria teoriaIgualAMutante = this.buscarTeoriaIgual(teoriaMutante, todasLasTeoriasSimilares);
+						
+						if (teoriaIgualAMutante != null)
+							nuevoKTeoriasSimilares = KTeoriasSimilares + 1;
+						else
+							nuevoKTeoriasSimilares = KTeoriasSimilares + 2;
+						
+						
+						if (teoriaIgualAMutante != null) {
+							teoriaIgualAMutante.setP(teoriaIgualAMutante.getP() + 1);
+						} else {
+							this.teorias.add(teoriaMutante);
+						}
+						
+					} else {
+						nuevoKTeoriasSimilares = KTeoriasSimilares + 1;
+					}
+					
+					for (Teoria teoria: todasLasTeoriasSimilares) {
+						teoria.setK(nuevoKTeoriasSimilares);
+					}
+					
+					teoriaLocal.setK(nuevoKTeoriasSimilares);					
+									
+				}
+			} else {
 				this.teorias.add(teoriaLocal);
 				if (teoriaLocal.getU() == 0) {
 					this.teoriasConUtilidadNula.add(teoriaLocal);
 				}
 			}
 		}
-	}
-
-	private boolean buscarTeoriaYAplicarHeuristica(Teoria teoriaLocal, ArrayList<Teoria> listaDeTeorias) {
+	}	
+	
+	
+	private ArrayList<Teoria> buscarTeoriasSimilares(Teoria teoriaLocal, ArrayList<Teoria> listaDeTeorias) {
 		
-		boolean encontroTeoria = false;
+		ArrayList<Teoria> teoriasSimilares = new ArrayList<Teoria>();
+		Situacion condicionInicialTeoriaLocal = teoriaLocal.getSitCondicionInicial();
+		ACTIONS accionTeoriaLocal = teoriaLocal.getAccionComoAction();
 		
 		for (Teoria teoria : listaDeTeorias) {
 			if (teoria != null) {
 				
 				Situacion condicionInicialTeoria = teoria.getSitCondicionInicial();
-				ACTIONS accionTeoria = teoria.getAccionComoAction();					
-				Situacion condicionInicialTeoriaLocal = teoriaLocal.getSitCondicionInicial();
-				ACTIONS accionTeoriaLocal = teoriaLocal.getAccionComoAction();
+				ACTIONS accionTeoria = teoria.getAccionComoAction();									
 				
 				if (condicionInicialTeoria.incluyeA(condicionInicialTeoriaLocal)
 						&& accionTeoria == accionTeoriaLocal){
-					encontroTeoria = true;
-					teoria.setK(teoria.getK() + 1);
 					
-					Situacion efectosPredichosTeoria = teoria.getSitEfectosPredichos();
-					Situacion efectosPredichosTeoriaLocal = teoriaLocal.getSitEfectosPredichos();
-					
-					if (teoria.getSitEfectosPredichos().incluyeA(teoriaLocal.getSitEfectosPredichos())){
-						teoria.setP(teoria.getP() + 1);
-					} else {
-						Situacion EPGeneralizados = efectosPredichosTeoria.generalizacionCon(efectosPredichosTeoriaLocal, 
-																						this.situacionesConocidas.size() + 1);
-						if (EPGeneralizados != null) {
-							teoriaLocal.setEfectosPredichos(EPGeneralizados);
-							this.teorias.add(teoriaLocal);
-							if (teoriaLocal.getU() == 0) {
-								this.teoriasConUtilidadNula.add(teoriaLocal);
-							}
-						}
-					}
-					
-					break;
+					teoriasSimilares.add(teoria);
 				}
 			}
-		}
-		return encontroTeoria;
+		}	
+		return teoriasSimilares;
 	}
+
+	private Teoria buscarTeoriaIgual(Teoria teoriaLocal, ArrayList<Teoria> listaDeTeoriasSimilares) {
+
+		Situacion efectosPredichosTeoriaLocal = teoriaLocal.getSitEfectosPredichos();
+
+		for (Teoria teoria : listaDeTeoriasSimilares) {
+			if (teoria != null) {				
+				
+				Situacion efectosPredichosTeoria = teoria.getSitEfectosPredichos();
+				
+				if (efectosPredichosTeoria.incluyeA(efectosPredichosTeoriaLocal)){
+					return teoria;
+				}
+			}
+		}	
+		return null;
+	}
+
+
 	
 	private ACTIONS calcularAccionYActualizarPlan(StateObservationMulti stateObs, Situacion situacionActual, 
 												Graph grafoTeoriasYSituaciones) {
