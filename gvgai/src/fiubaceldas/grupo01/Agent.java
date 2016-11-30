@@ -109,23 +109,11 @@ public class Agent extends AbstractMultiPlayer {
 			cantidadCajasEnObjetivosEP = posicionesCadaTipoDeElementoEP.get("X").size();
 				
 		int cantidadCajasEP = cantidadCajasSueltasEP + cantidadCajasEnObjetivosEP;
-		
-		
-		Vector2d posicionPersonajeCI = null;
-		if (posicionesCadaTipoDeElementoCI.containsKey("A"))
-			posicionPersonajeCI = posicionesCadaTipoDeElementoCI.get("A").get(0);
-		if (posicionesCadaTipoDeElementoCI.containsKey("Y"))
-			posicionPersonajeCI = posicionesCadaTipoDeElementoCI.get("Y").get(0);
-		
-		Vector2d posicionPersonajeEP = null;
-		if (posicionesCadaTipoDeElementoEP.containsKey("A"))
-			posicionPersonajeEP = posicionesCadaTipoDeElementoEP.get("A").get(0);
-		if (posicionesCadaTipoDeElementoEP.containsKey("Y"))
-			posicionPersonajeEP = posicionesCadaTipoDeElementoEP.get("Y").get(0);
+
 		
 		boolean habiaCajas = (cantidadCajasCI > 0);
 		boolean hayCajas = (cantidadCajasEP > 0);
-		boolean personajeSeMovio = (!(posicionPersonajeCI.equals(posicionPersonajeEP)));
+		boolean personajeSeMovio = (!(condicionInicial.mismaPosicionPersonaje(efectosPredichos)));
 		
 		if (!hayCajas) {
 			if (habiaCajas) {
@@ -139,7 +127,7 @@ public class Agent extends AbstractMultiPlayer {
 		} else {
 			return this.calcularUtilidadSiHayCajas(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
 					cantidadCajasSueltasCI, cantidadCajasSueltasEP, cantidadCajasEnObjetivosCI, cantidadCajasEnObjetivosEP,
-					posicionPersonajeCI, posicionPersonajeEP);
+					condicionInicial, efectosPredichos);
 		}
 	}
 	
@@ -147,7 +135,7 @@ public class Agent extends AbstractMultiPlayer {
 								HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
 								int cantidadCajasSueltasCI, int cantidadCajasSueltasEP,
 								int cantidadCajasEnObjetivosCI, int cantidadCajasEnObjetivosEP,
-								Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP) { //
+								Situacion condicionInicial, Situacion efectosPredichos) { //
 		
 		int cantidadPersEnObjetivosEP = 0;
 		int cantidadObtetivosLibresEP = 0;
@@ -163,17 +151,17 @@ public class Agent extends AbstractMultiPlayer {
 		
 		if (!hayObjetivos)
 			return calcularUtilidadSinObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
-											cantidadCajasEnObjetivosCI, posicionPersonajeCI, posicionPersonajeEP);
+											cantidadCajasEnObjetivosCI, condicionInicial, efectosPredichos);
 		else
 			return calcularUtilidadConObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
 					cantidadCajasSueltasEP, cantidadCajasEnObjetivosCI, cantidadCajasEnObjetivosEP, 
-					posicionPersonajeCI, posicionPersonajeEP);
+					condicionInicial, efectosPredichos);
 	}
 
 
 	private double calcularUtilidadSinObjetivos(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI, 
 			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP, int cantidadCajasEnObjetivosCI,
-			Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP) { //
+			Situacion condicionInicial, Situacion efectosPredichos) { //
 		
 		int cantidadPersEnObjetivosCI = 0;
 		int cantidadObtetivosLibresCI = 0;
@@ -191,12 +179,12 @@ public class Agent extends AbstractMultiPlayer {
 			return 0.1875;
 		else
 			return calcularUtilidadSinObjetivosCINiEP(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
-					posicionPersonajeCI, posicionPersonajeEP);
+					condicionInicial, efectosPredichos);
 	}
 	
 	private double calcularUtilidadSinObjetivosCINiEP(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
 			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
-			Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP) { //
+			Situacion condicionInicial, Situacion efectosPredichos) { //
 		
 		
 		ArrayList<Vector2d> posicionesCajasSueltasCI = null;
@@ -224,7 +212,7 @@ public class Agent extends AbstractMultiPlayer {
 		if (!seMovioAlgunaCaja)
 			return calcularUtilidadSiNoSeMovieronCajas(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
 					posicionesCajasSueltasCI, posicionesCajasSueltasEP,
-					posicionPersonajeCI, posicionPersonajeEP);
+					condicionInicial, efectosPredichos);
 		else
 			return 0.4375;
 	}
@@ -232,18 +220,20 @@ public class Agent extends AbstractMultiPlayer {
 	private double calcularUtilidadSiNoSeMovieronCajas(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
 			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
 			ArrayList<Vector2d> posicionesCajasSueltasCI, ArrayList<Vector2d> posicionesCajasSueltasEP,
-			Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP) { //
+			Situacion condicionInicial, Situacion efectosPredichos) { //
+		
+		Vector2d posicionPersonaje = new Vector2d(3,3);
 		
 		double distMinimaACajasCI = 100;
 		for (Vector2d posicionCajaCI: posicionesCajasSueltasCI) {
-			double distanciaACaja = posicionPersonajeCI.dist(posicionCajaCI);
+			double distanciaACaja = posicionPersonaje.dist(posicionCajaCI);
 			if (distanciaACaja < distMinimaACajasCI)
 				distMinimaACajasCI = distanciaACaja;
 		}
 		
 		double distMinimaACajasEP = 100;
 		for (Vector2d posicionCajaEP: posicionesCajasSueltasEP) {
-			double distanciaACaja = posicionPersonajeEP.dist(posicionCajaEP);
+			double distanciaACaja = posicionPersonaje.dist(posicionCajaEP);
 			if (distanciaACaja < distMinimaACajasEP)
 				distMinimaACajasEP = distanciaACaja;
 		}
@@ -252,7 +242,7 @@ public class Agent extends AbstractMultiPlayer {
 		if (seAlejoDeLasCajas) {
 			return 0.25;
 		} else {
-			boolean seMovioElPersonaje = (!(posicionPersonajeCI.equals(posicionPersonajeEP)));
+			boolean seMovioElPersonaje = (!(condicionInicial.mismaPosicionPersonaje(efectosPredichos)));
 			if (!seMovioElPersonaje)
 				return 0.3125;
 			else
@@ -263,8 +253,8 @@ public class Agent extends AbstractMultiPlayer {
 	private double calcularUtilidadConObjetivos(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
 			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
 			int cantidadCajasSueltasEP, int cantidadCajasEnObjetivosCI,
-			int cantidadCajasEnObjetivosEP, Vector2d posicionPersonajeCI,
-			Vector2d posicionPersonajeEP) { //
+			int cantidadCajasEnObjetivosEP, Situacion condicionInicial,
+			Situacion efectosPredichos) { //
 
 		
 		ArrayList<Vector2d> posicionesCajasSueltasEP = null;
@@ -284,7 +274,7 @@ public class Agent extends AbstractMultiPlayer {
 		boolean hayCajasEnObjetivos = (cantidadCajasEnObjetivosEP > 0);
 		if (!hayCajasEnObjetivos)
 			return calcularUtilidadSinCajasEnObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
-					cantidadCajasEnObjetivosCI, posicionPersonajeCI, posicionPersonajeEP,
+					cantidadCajasEnObjetivosCI, condicionInicial, efectosPredichos ,
 					posicionesCajasSueltasEP, posicionesObjetivosSinCajasEP);
 		else
 			return calcularUtilidadConCajasEnObjetivos(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
@@ -295,8 +285,8 @@ public class Agent extends AbstractMultiPlayer {
 
 	private double calcularUtilidadSinCajasEnObjetivos(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
 			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
-			int cantidadCajasEnObjetivosCI, Vector2d posicionPersonajeCI,
-			Vector2d posicionPersonajeEP,
+			int cantidadCajasEnObjetivosCI, Situacion condicionInicial,
+			Situacion efectosPredichos,
 			ArrayList<Vector2d> posicionesCajasSueltasEP, ArrayList<Vector2d> posicionesObjetivosSinCajasEP) { //
 		
 		boolean habiaCajasEnObjetivos = (cantidadCajasEnObjetivosCI > 0);
@@ -304,7 +294,7 @@ public class Agent extends AbstractMultiPlayer {
 			return 0.5;
 		else
 			return calcularUtilidadSinCajasEnObjetivosCINiEP(posicionesCadaTipoDeElementoCI, posicionesCadaTipoDeElementoEP,
-					posicionPersonajeCI, posicionPersonajeEP,
+					condicionInicial, efectosPredichos,
 					posicionesCajasSueltasEP, posicionesObjetivosSinCajasEP);
 			
 	}
@@ -312,7 +302,7 @@ public class Agent extends AbstractMultiPlayer {
 	
 	private double calcularUtilidadSinCajasEnObjetivosCINiEP(HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI,
 			HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP,
-			Vector2d posicionPersonajeCI, Vector2d posicionPersonajeEP,
+			Situacion condicionInicial, Situacion efectosPredichos,
 			ArrayList<Vector2d> posicionesCajasSueltasEP, ArrayList<Vector2d> posicionesObjetivosSinCajasEP) { //
 			
 		boolean aumentoDistanciaCajasObjetivos = false;		
@@ -359,7 +349,7 @@ public class Agent extends AbstractMultiPlayer {
 		if (aumentoDistanciaCajasObjetivos) {
 			return 0.5625;
 		} else {
-			boolean seMovioPersonaje = (!(posicionPersonajeCI.equals(posicionPersonajeEP)));
+			boolean seMovioPersonaje = (!(condicionInicial.mismaPosicionPersonaje(efectosPredichos)));
 			if (!seMovioPersonaje)
 				return 0.625;
 			else
@@ -814,8 +804,8 @@ public class Agent extends AbstractMultiPlayer {
 	private char[][] obtenerCasillerosSitActual() {
 		char[][] casillerosNivel = medioManager.getLevel();
 		char[][] casillerosSituacion = new char[7][7];
-		int colPersonaje = medioManager.getPosicionPersonajeX();
-		int filaPersonaje = medioManager.getPosicionPersonajeY();
+		int colPersonaje = (int) (medioManager.getPosicionPersonajeX());
+		int filaPersonaje = (int)(medioManager.getPosicionPersonajeY());
 		int anchoMapa = medioManager.getLevelWidth();
 		int altoMapa = medioManager.getLevelHeight();
 		int filaSit = 0;

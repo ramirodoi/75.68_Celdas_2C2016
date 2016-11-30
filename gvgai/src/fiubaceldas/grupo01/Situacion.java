@@ -179,4 +179,20 @@ public class Situacion {
 		}
 		return posicionesCadaTipoDeElemento;
 	}
+	
+	public boolean mismaPosicionPersonaje(Situacion otraSituacion) {
+		Simbolo[][] casilleros = this.getCasilleros();
+		Simbolo[][] casillerosOtraSituacion = otraSituacion.getCasilleros();
+		for (int i = 0; i < 7; i++) {
+			for (int j = 0; j < 7; j++) {
+				String simbolo = casilleros[i][j].getSimbolo();
+				String simboloOtraSituacion = casillerosOtraSituacion[i][j].getSimbolo();
+				boolean simboloPared = (simbolo.equals("w") || simboloOtraSituacion.equals("w"));
+				boolean simbolosDistintos = (!(simbolo.equals(simboloOtraSituacion)));
+				if (simboloPared && simbolosDistintos)
+					return false;
+			}
+		}
+		return true;
+	}
 }
