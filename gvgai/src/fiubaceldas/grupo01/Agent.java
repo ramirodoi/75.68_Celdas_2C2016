@@ -1,10 +1,8 @@
 package fiubaceldas.grupo01;
 
-import java.awt.List;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.LineNumberInputStream;
 import java.lang.reflect.Type;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -13,8 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.Vector;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -723,31 +719,41 @@ public class Agent extends AbstractMultiPlayer {
 	//Realiza un movimiento random.
 	private ontology.Types.ACTIONS RealizarMovimientoRandom(StateObservationMulti stateObs, Situacion situacionActual){
 		ArrayList<ACTIONS> accionesPosibles = stateObs.getAvailableActions(this.playerID);
+		ArrayList<ACTIONS> accionesNoPosibles = new ArrayList<>();
 		
-		while (accionesPosibles.size() > 0) {
+		while (accionesNoPosibles.size() != 4) {
+			ACTIONS accionRandom = ACTIONS.values()[new Random().nextInt(accionesPosibles.size())];
 			
-			int nAccionRandom = new Random().nextInt(accionesPosibles.size());
-			ACTIONS accionRandom = ACTIONS.values()[nAccionRandom];
+			while (accionesNoPosibles.contains(accionRandom)){
+				accionRandom = ACTIONS.values()[new Random().nextInt(accionesPosibles.size())];
+			}
 			
-			if (situacionActual == null)
+			if (situacionActual == null){
 				return accionRandom;
+			}
 			
 			boolean accionPerdedora = false;
+			
 			for (Teoria teoriaConUtilidadNula: this.teoriasConUtilidadNula) {
 				ACTIONS accionTeoriaUtilidadNula = teoriaConUtilidadNula.getAccionComoAction();
+				
 				if (accionRandom.equals(accionTeoriaUtilidadNula)) {
 					Situacion CITeoriaUtilidadNula = teoriaConUtilidadNula.getSitCondicionInicial();
+					
 					if (CITeoriaUtilidadNula.incluyeA(situacionActual)) {
 						accionPerdedora = true;
 						break;
 					}
 				}
 			}
-			if (accionPerdedora)
-				accionesPosibles.remove(nAccionRandom);
-			else
+			
+			if (accionPerdedora){
+				accionesNoPosibles.add(accionRandom);
+			} else {
 				return accionRandom;
+			}
 		}
+		
 		return ACTIONS.ACTION_NIL;
 	}
 
