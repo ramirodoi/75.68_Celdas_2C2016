@@ -669,12 +669,30 @@ public class Agent extends AbstractMultiPlayer {
 	}
 	
 	private Teoria obtenerTeoriaConMayorUtilidad() {
-		double utilidadMAX = 0;
+		double utilidadMax = 0;
 		Teoria teoriaConUtilidadMax = null;
 		
 		for (Teoria teoria : this.teorias) {
-			if (teoria.getU() >= utilidadMAX){
-				utilidadMAX = teoria.getU();
+			if (teoria.getU() >= utilidadMax){
+				utilidadMax = teoria.getU();
+			}
+		}
+		
+		if (utilidadMax == 0)
+			return null;
+		
+		ArrayList<Teoria> teoriasConUtilidadMax = new ArrayList<Teoria>();
+		for (Teoria teoria : this.teorias) {
+			if (teoria.getU() == utilidadMax){
+				teoriasConUtilidadMax.add(teoria);
+			}
+		}
+		
+		double maxPorcentajeExitos = 0;
+		for (Teoria teoria : teoriasConUtilidadMax) {
+			double porcentajeExitos = teoria.getP() / teoria.getK();
+			if (porcentajeExitos >= maxPorcentajeExitos){
+				maxPorcentajeExitos = porcentajeExitos;
 				teoriaConUtilidadMax = teoria;
 			}
 		}
