@@ -139,6 +139,9 @@ public class Agent extends AbstractMultiPlayer {
 		if (posicionesCadaTipoDeElementoEP.containsKey("Y"))
 			cantidadPersEnObjetivosEP = posicionesCadaTipoDeElementoEP.get("Y").size();
 		
+		if (posicionesCadaTipoDeElementoEP.containsKey("Z"))
+			cantidadPersEnObjetivosEP += posicionesCadaTipoDeElementoEP.get("Z").size();
+		
 		if (posicionesCadaTipoDeElementoEP.containsKey("0"))
 			cantidadObtetivosLibresEP = posicionesCadaTipoDeElementoEP.get("0").size();
 		
@@ -164,6 +167,9 @@ public class Agent extends AbstractMultiPlayer {
 		
 		if (posicionesCadaTipoDeElementoCI.containsKey("Y"))
 			cantidadPersEnObjetivosCI = posicionesCadaTipoDeElementoCI.get("Y").size();
+		
+		if (posicionesCadaTipoDeElementoCI.containsKey("Z"))
+			cantidadPersEnObjetivosCI += posicionesCadaTipoDeElementoCI.get("Z").size();
 		
 		if (posicionesCadaTipoDeElementoCI.containsKey("0"))
 			cantidadObtetivosLibresCI = posicionesCadaTipoDeElementoCI.get("0").size();
@@ -266,6 +272,12 @@ public class Agent extends AbstractMultiPlayer {
 			else
 				posicionesObjetivosSinCajasEP.addAll(posicionesCadaTipoDeElementoEP.get("Y"));
 		}
+		if (posicionesCadaTipoDeElementoEP.containsKey("Z")) {
+			if (posicionesObjetivosSinCajasEP == null)
+				posicionesObjetivosSinCajasEP = posicionesCadaTipoDeElementoEP.get("Z");
+			else
+				posicionesObjetivosSinCajasEP.addAll(posicionesCadaTipoDeElementoEP.get("Z"));
+		}
 		
 		boolean hayCajasEnObjetivos = (cantidadCajasEnObjetivosEP > 0);
 		if (!hayCajasEnObjetivos)
@@ -325,6 +337,12 @@ public class Agent extends AbstractMultiPlayer {
 				posicionesObjetivosSinCajasCI = posicionesCadaTipoDeElementoCI.get("Y");
 			else
 				posicionesObjetivosSinCajasCI.addAll(posicionesCadaTipoDeElementoCI.get("Y"));
+		}
+		if (posicionesCadaTipoDeElementoCI.containsKey("Z")) {
+			if (posicionesObjetivosSinCajasCI == null)
+				posicionesObjetivosSinCajasCI = posicionesCadaTipoDeElementoCI.get("Z");
+			else
+				posicionesObjetivosSinCajasCI.addAll(posicionesCadaTipoDeElementoCI.get("Z"));
 		}
 		
 		
@@ -553,17 +571,8 @@ public class Agent extends AbstractMultiPlayer {
 				}
 			//Si se estaba ejecutando un plan para llegar a un obj pero falla la última predicción	
 			} else {
-				Situacion objetivoActual = plan.obtenerSituacionObjetivo();
-				plan.reiniciar();
-				
-				//Se calcula un nuevo camino a ver si se puede llegar al obj desde donde está ahora
-				armarNuevoPlan(situacionActual, objetivoActual, grafoTeoriasYSituaciones);
-				
-				//Si se encontró un nuevo camino lo ejecuta
-				if (plan.enEjecucion())
-					return plan.ejecutarSiguienteAccion();
-				else
-					return this.RealizarMovimientoRandom(stateObs, situacionActual);
+				plan.reiniciar();				
+				return this.RealizarMovimientoRandom(stateObs, situacionActual);
 			}
 		} else {
 			Teoria teoriaNuevoObjetivo = obtenerTeoriaConMayorUtilidad();
@@ -821,13 +830,19 @@ public class Agent extends AbstractMultiPlayer {
 				Vector2d posicionEnMapa = new Vector2d(col,fila);				
 				if (fila >= 0 && fila < altoMapa && col >= 0 && col < anchoMapa) {
 					char simboloVisible = casillerosNivel[fila][col];
-					if (simboloVisible == '1' && this.posicionesObjetivos.contains(posicionEnMapa))
+					if (simboloVisible == '1' && this.posicionesObjetivos.contains(posicionEnMapa)) {
 						casillerosSituacion[filaSit][colSit] = 'X';
-					else
-						if (simboloVisible == 'A' && this.posicionesObjetivos.contains(posicionEnMapa))
+					} else {
+						if (simboloVisible == 'A' && this.posicionesObjetivos.contains(posicionEnMapa)) {
 							casillerosSituacion[filaSit][colSit] = 'Y';
-						else
-							casillerosSituacion[filaSit][colSit] = simboloVisible;
+						} else {
+							if (simboloVisible == 'B' && this.posicionesObjetivos.contains(posicionEnMapa)) {
+								casillerosSituacion[filaSit][colSit] = 'Z';
+							} else {
+								casillerosSituacion[filaSit][colSit] = simboloVisible;
+							}							
+						}
+					}
 				} else {
 					casillerosSituacion[filaSit][colSit] = '?';
 				}

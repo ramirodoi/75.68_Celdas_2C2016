@@ -69,6 +69,10 @@ public class Situacion {
 					this.casilleros[i][j] = new LetraX();
 				else if(caracterCasillero == 'Y')
 					this.casilleros[i][j] = new LetraY();
+				else if(caracterCasillero == 'Z')
+					this.casilleros[i][j] = new LetraZ();
+				else if(caracterCasillero == 'P')
+					this.casilleros[i][j] = new LetraAoB();
 				else if(caracterCasillero == '?')
 					this.casilleros[i][j] = new SignoDePregunta();
 			}
@@ -107,7 +111,7 @@ public class Situacion {
 				char simboloSitGeneral;
 				if (simbolo.esIgualA(simboloOtraSituacion)) {
 					simboloSitGeneral = simbolo.getSimbolo().charAt(0);
-					if (simboloSitGeneral != '?' && simboloSitGeneral != 'A')
+					if (simboloSitGeneral != '?' && simboloSitGeneral != 'A' && simboloSitGeneral != 'B')
 						cantidadSimbolosCoinciden++;
 				} else {
 					simboloSitGeneral = '?';

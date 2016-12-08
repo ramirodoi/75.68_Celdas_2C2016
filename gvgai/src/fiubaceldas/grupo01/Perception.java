@@ -48,6 +48,9 @@ public class Perception {
 
 	        this.level = new char[levelHeight][levelWidth];
 	        
+	        this.posPersonajeX = (int)(stateObs.getAvatarPosition().x) / this.spriteSizeWidthInPixels;
+	        this.posPersonajeY = (int)stateObs.getAvatarPosition().y / this.spriteSizeHeightInPixels;
+	        
 	        
 	        for(int i=0;i< levelWidth; i++){
 	        	for(int j=0;j< levelHeight; j++){
@@ -65,8 +68,8 @@ public class Perception {
 	        			 }else if(o.category == 0){        				 
 	        				 if(o.itype == 5){
 	        					 this.level[j][i] = 'A';
-	        					 this.posPersonajeX = i;
-	        					 this.posPersonajeY = j;
+//	        					 this.posPersonajeX = i;
+//	        					 this.posPersonajeY = j;
 	        				 }else if(o.itype == 6){
 	        					 this.level[j][i] = 'B';
 	        				 }
