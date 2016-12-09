@@ -23,7 +23,7 @@ import tools.Vector2d;
 import graph.*;
 
 public class Agent extends AbstractMultiPlayer {
-	private Path pathTeorias = FileSystems.getDefault().getPath(System.getProperty("user.dir") + "\\src\\fiubaceldas\\grupo01\\Teorias");
+	private Path pathTeorias;
 	private Path pathTeoriasPrecargadas = FileSystems.getDefault().getPath(System.getProperty("user.dir") + "\\src\\fiubaceldas\\grupo01\\TeoriasPrecargadas");
 	private Perception medioManager;
 	private Gson gsonManager;
@@ -33,6 +33,8 @@ public class Agent extends AbstractMultiPlayer {
 	private ArrayList<Teoria> teoriasConUtilidadNula;
 	private ArrayList<Situacion> situacionesConocidas;
 	private ArrayList<Vector2d> posicionesObjetivos;
+	private int posPersonajeX;
+	private int posPersonajeY;
 	private Situacion situacionAnterior = null;
 	private Plan plan = new Plan();
 	private ArrayList<Integer> idSitObjetivosAlcanzados = new ArrayList<Integer>();
@@ -41,6 +43,8 @@ public class Agent extends AbstractMultiPlayer {
 		this.medioManager =  new Perception(stateObs);
 		this.gsonManager = new GsonBuilder().setPrettyPrinting().create();
 		this.playerID = playerID;
+		String stringPathTeorias = "\\src\\fiubaceldas\\grupo01\\Teorias" + Integer.toString(this.playerID);
+		this.pathTeorias = FileSystems.getDefault().getPath(System.getProperty("user.dir") + stringPathTeorias);
 		this.teorias = new ArrayList<Teoria>();
 		this.teoriasPrecargadas = new ArrayList<Teoria>();
 		this.teoriasConUtilidadNula = new ArrayList<Teoria>();
@@ -52,8 +56,9 @@ public class Agent extends AbstractMultiPlayer {
 	public ACTIONS act(StateObservationMulti stateObs, ElapsedCpuTimer elapsedTimer){
 		
 		this.medioManager =  new Perception(stateObs);
-		if (this.medioManager.getPosicionPersonajeX() == -1)
-			return this.RealizarMovimientoRandom(stateObs, null);
+
+		this.posPersonajeX = (int)(stateObs.getAvatarPosition(this.playerID).x) / this.medioManager.getSpriteSizeWidthInPixels();
+        this.posPersonajeY = (int)stateObs.getAvatarPosition(this.playerID).y / this.medioManager.getSpriteSizeHeightInPixels();
 		
 		this.ObtenerTeorias();
 		this.situacionesConocidas = this.obtenerSituacionesConocidas();
@@ -817,7 +822,6 @@ public class Agent extends AbstractMultiPlayer {
 		try {
 			return(new String(Files.readAllBytes(this.pathTeorias)));
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		
 		return(null);
@@ -828,7 +832,6 @@ public class Agent extends AbstractMultiPlayer {
 		try {
 			return(new String(Files.readAllBytes(this.pathTeoriasPrecargadas)));
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 		
 		return(null);
@@ -837,8 +840,8 @@ public class Agent extends AbstractMultiPlayer {
 	private char[][] obtenerCasillerosSitActual() {
 		char[][] casillerosNivel = medioManager.getLevel();
 		char[][] casillerosSituacion = new char[7][7];
-		int colPersonaje = (int) (medioManager.getPosicionPersonajeX());
-		int filaPersonaje = (int)(medioManager.getPosicionPersonajeY());
+		int colPersonaje = (int) (this.posPersonajeX);
+		int filaPersonaje = (int)(this.posPersonajeY);
 		int anchoMapa = medioManager.getLevelWidth();
 		int altoMapa = medioManager.getLevelHeight();
 		int filaSit = 0;

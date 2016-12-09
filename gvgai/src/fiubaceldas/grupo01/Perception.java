@@ -27,8 +27,6 @@ public class Perception {
 	private int levelHeight;
 	private int spriteSizeWidthInPixels;
 	private int spriteSizeHeightInPixels;
-	private int posPersonajeX = -1;
-	private int posPersonajeY = -1;
 	private ArrayList<Vector2d> posicionesObjetivos;
 
 	
@@ -47,9 +45,6 @@ public class Perception {
 	        this.posicionesObjetivos = new ArrayList<Vector2d>();
 
 	        this.level = new char[levelHeight][levelWidth];
-	        
-	        this.posPersonajeX = (int)(stateObs.getAvatarPosition().x) / this.spriteSizeWidthInPixels;
-	        this.posPersonajeY = (int)stateObs.getAvatarPosition().y / this.spriteSizeHeightInPixels;
 	        
 	        
 	        for(int i=0;i< levelWidth; i++){
@@ -119,14 +114,6 @@ public class Perception {
 	
 	public int getSpriteSizeHeightInPixels() {
 		return spriteSizeHeightInPixels;
-	}
-	
-	public int getPosicionPersonajeX() {
-		return posPersonajeX;
-	}
-	
-	public int getPosicionPersonajeY() {
-		return posPersonajeY;
 	}
 	
 	public ArrayList<Vector2d> getPosicionesObjetivos() {
