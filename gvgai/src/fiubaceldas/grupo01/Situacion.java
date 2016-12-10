@@ -73,6 +73,8 @@ public class Situacion {
 					this.casilleros[i][j] = new LetraZ();
 				else if(caracterCasillero == 'P')
 					this.casilleros[i][j] = new LetraAoB();
+				else if (caracterCasillero == 'Q')
+					this.casilleros[i][j] = new NoCero();
 				else if(caracterCasillero == '?')
 					this.casilleros[i][j] = new SignoDePregunta();
 			}

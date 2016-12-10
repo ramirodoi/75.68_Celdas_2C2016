@@ -71,7 +71,7 @@ public class Agent extends AbstractMultiPlayer {
 				
 		if (situacionAnterior != null){
 			Teoria teoriaLocal = new Teoria(this.teorias.size()+this.teoriasPrecargadas.size()+ 1, this.situacionAnterior, stateObs.getAvatarLastAction(), situacionActual, 1, 1, 
-									calcularUtilidadTeoria(this.situacionAnterior, situacionActual));
+									calcularUtilidadTeoria(this.situacionAnterior, stateObs.getAvatarLastAction(), situacionActual));
 			evaluarTeoria(teoriaLocal);
 		}
 		
@@ -83,7 +83,10 @@ public class Agent extends AbstractMultiPlayer {
 		return siguienteAccion;
 	}
 	
-	private double calcularUtilidadTeoria(Situacion condicionInicial, Situacion efectosPredichos) { //
+	private double calcularUtilidadTeoria(Situacion condicionInicial, ACTIONS accion, Situacion efectosPredichos) { //
+
+		if (this.esAccionPerdedora(condicionInicial, accion))
+			return 0.0;
 		
 		HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoCI = condicionInicial.obtenerPosicionesCadaTipoDeElemento();
 		HashMap<String, ArrayList<Vector2d>> posicionesCadaTipoDeElementoEP = efectosPredichos.obtenerPosicionesCadaTipoDeElemento();
@@ -476,9 +479,15 @@ public class Agent extends AbstractMultiPlayer {
 					
 					if (EPTeoriaMutante != null) {
 					
+						double utilidadTeoriaMutante;
+						if (teoriaLocal.getU() == 0.0)
+							utilidadTeoriaMutante = 0.0;
+						else
+							utilidadTeoriaMutante = calcularUtilidadTeoria(CITeoriaLocal, teoriaLocal.getAccionComoAction(), EPTeoriaMutante);
+						
 						Teoria teoriaMutante = new Teoria(teoriaLocal.getId() + 1, 
 												CITeoriaLocal, teoriaLocal.getAccionComoAction(), EPTeoriaMutante, 
-												KTeoriasSimilares + 2, 1, calcularUtilidadTeoria(CITeoriaLocal, EPTeoriaMutante));
+												KTeoriasSimilares + 2, 1, utilidadTeoriaMutante);
 						
 						Teoria teoriaIgualAMutante = this.buscarTeoriaIgual(teoriaMutante, todasLasTeoriasSimilares);
 						
@@ -558,6 +567,7 @@ public class Agent extends AbstractMultiPlayer {
 	
 	private ACTIONS calcularAccionYActualizarPlan(StateObservationMulti stateObs, Situacion situacionActual, 
 												Graph grafoTeoriasYSituaciones) {
+		
 		if (plan.enEjecucion()) {
 			if (plan.cumpleElPlan(situacionActual)) {
 				if (!plan.seLlegoAlObjetivo()) {
@@ -590,10 +600,11 @@ public class Agent extends AbstractMultiPlayer {
 			if (!(this.idSitObjetivosAlcanzados.contains(nuevoObjetivo.getId())))
 				armarNuevoPlan(situacionActual, nuevoObjetivo, grafoTeoriasYSituaciones);
 			
-			if (plan.enEjecucion())
+			if (plan.enEjecucion()) {
 				return plan.ejecutarSiguienteAccion();
-			else
+			} else {
 				return this.RealizarMovimientoRandom(stateObs, situacionActual);
+			}
 		}
 	}
 	
@@ -764,22 +775,7 @@ public class Agent extends AbstractMultiPlayer {
 				return accionRandom;
 			}
 			
-			boolean accionPerdedora = false;
-			
-			for (Teoria teoriaConUtilidadNula: this.teoriasConUtilidadNula) {
-				ACTIONS accionTeoriaUtilidadNula = teoriaConUtilidadNula.getAccionComoAction();
-				
-				if (accionRandom.equals(accionTeoriaUtilidadNula)) {
-					Situacion CITeoriaUtilidadNula = teoriaConUtilidadNula.getSitCondicionInicial();
-					
-					if (CITeoriaUtilidadNula.incluyeA(situacionActual)) {
-						accionPerdedora = true;
-						break;
-					}
-				}
-			}
-			
-			if (accionPerdedora){
+			if (this.esAccionPerdedora(situacionActual, accionRandom)){
 				accionesNoPosibles.add(accionRandom);
 			} else {
 				return accionRandom;
@@ -787,6 +783,21 @@ public class Agent extends AbstractMultiPlayer {
 		}
 		
 		return ACTIONS.ACTION_NIL;
+	}
+	
+	boolean esAccionPerdedora(Situacion condicionInicial, ACTIONS accion) {
+		for (Teoria teoriaConUtilidadNula: this.teoriasConUtilidadNula) {
+			ACTIONS accionTeoriaUtilidadNula = teoriaConUtilidadNula.getAccionComoAction();
+			
+			if (accion.equals(accionTeoriaUtilidadNula)) {
+				Situacion CITeoriaUtilidadNula = teoriaConUtilidadNula.getSitCondicionInicial();
+				
+				if (CITeoriaUtilidadNula.incluyeA(condicionInicial)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	
