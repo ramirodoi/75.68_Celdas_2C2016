@@ -69,9 +69,11 @@ public class Agent extends AbstractMultiPlayer {
 		
 		Situacion situacionActual = this.obtenerSituacionActual();
 				
+		ACTIONS ultimaAccion = stateObs.getAvatarLastAction(this.playerID);
+		
 		if (situacionAnterior != null){
-			Teoria teoriaLocal = new Teoria(this.teorias.size()+this.teoriasPrecargadas.size()+ 1, this.situacionAnterior, stateObs.getAvatarLastAction(), situacionActual, 1, 1, 
-									calcularUtilidadTeoria(this.situacionAnterior, stateObs.getAvatarLastAction(), situacionActual));
+			Teoria teoriaLocal = new Teoria(this.teorias.size()+this.teoriasPrecargadas.size()+ 1, this.situacionAnterior, ultimaAccion, situacionActual, 1, 1, 
+									calcularUtilidadTeoria(this.situacionAnterior, ultimaAccion, situacionActual));
 			evaluarTeoria(teoriaLocal);
 		}
 		
@@ -566,12 +568,17 @@ public class Agent extends AbstractMultiPlayer {
 
 	
 	private ACTIONS calcularAccionYActualizarPlan(StateObservationMulti stateObs, Situacion situacionActual, 
-												Graph grafoTeoriasYSituaciones) {
-		
+												Graph grafoTeoriasYSituaciones) {		
 		if (plan.enEjecucion()) {
 			if (plan.cumpleElPlan(situacionActual)) {
 				if (!plan.seLlegoAlObjetivo()) {
-					return plan.ejecutarSiguienteAccion();
+					ACTIONS siguienteAccion = plan.ejecutarSiguienteAccion();
+					if (!(this.esAccionPerdedora(situacionActual, siguienteAccion))) {
+						return siguienteAccion;
+					} else {
+						plan.reiniciar();
+						return this.RealizarMovimientoRandom(stateObs, situacionActual);
+					}
 				} else {
 					if (plan.getUtilidadObjetivo() == 1) {
 						//TODO: GANÓ
@@ -601,7 +608,13 @@ public class Agent extends AbstractMultiPlayer {
 				armarNuevoPlan(situacionActual, nuevoObjetivo, grafoTeoriasYSituaciones);
 			
 			if (plan.enEjecucion()) {
-				return plan.ejecutarSiguienteAccion();
+				ACTIONS siguienteAccion = plan.ejecutarSiguienteAccion();
+				if (!(this.esAccionPerdedora(situacionActual, siguienteAccion))) {
+					return siguienteAccion;
+				} else {
+					plan.reiniciar();
+					return this.RealizarMovimientoRandom(stateObs, situacionActual);
+				}
 			} else {
 				return this.RealizarMovimientoRandom(stateObs, situacionActual);
 			}
