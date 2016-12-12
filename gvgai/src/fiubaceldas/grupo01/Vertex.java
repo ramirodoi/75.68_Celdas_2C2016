@@ -1,4 +1,4 @@
-package graph;
+package fiubaceldas.grupo01;
 
 public class Vertex {
     final private String id;
